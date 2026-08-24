@@ -6,7 +6,7 @@ Titik masuk utama untuk histori & progres semua pekerjaan yang dicatat via Obsid
 
 | Project | Status | Progres |
 |---------|--------|---------|
-| Analytic & Reporting Dashboard Divisi | R0 — Foundation | FND-01 selesai; lanjut FND-02 |
+| Analytic & Reporting Dashboard Divisi | R0 — Foundation | FND-01–02 selesai; lanjut FND-03 |
 
 ## Log Progres
 
@@ -14,6 +14,7 @@ Titik masuk utama untuk histori & progres semua pekerjaan yang dicatat via Obsid
 - **2026-08-24** — 7 dokumen spesifikasi (PRD/ARD/UI-UX/DataDict/API/UAT/Backlog) dibaca & dianalisis; arah project ditetapkan: satu website modular monolith, MVP Manajer Minimarket.
 - **2026-08-24** — Repo dipindah dari `E:\DASHBOARD DIVISI` (exFAT, lambat & tanpa symlink) ke `C:\Projects\dashboard-divisi` (NTFS). Folder lama tetap ada sebagai cadangan; buka ulang vault Obsidian di lokasi baru.
 - **2026-08-24** — **FND-01 SELESAI**: monorepo pnpm (apps/web React+Vite, apps/api NestJS, packages/contracts, packages/db placeholder, scripts/) + gate lint/typecheck/test/build hijau semua.
+- **2026-08-24** — **FND-02 SELESAI**: validasi environment gagal-cepat via @nestjs/config (`NODE_ENV` local/test/staging, `PORT`), terbukti exit 1 saat runtime dengan env invalid; `.env.example` ter-commit, `.env*` tetap di-ignore; `DATABASE_URL` didokumentasikan untuk FND-05.
 
 ## Keputusan Penting
 
