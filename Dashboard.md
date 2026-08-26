@@ -6,7 +6,13 @@ Titik masuk utama untuk histori & progres semua pekerjaan yang dicatat via Obsid
 
 | Project | Status | Progres |
 |---------|--------|---------|
-| Analytic & Reporting Dashboard Divisi | R0 — Foundation | FND-01–02 selesai; lanjut FND-03 |
+| Analytic & Reporting Dashboard Divisi (`proj-2026-08-26-p06j8t`) | R0 — Foundation | 2/80 task selesai (FND-01, FND-02); berikutnya FND-03/FND-04/PERF-01/HR-01 |
+
+## Mode Kerja (per 2026-08-26)
+
+- **Owner mengerjakan FE & BE** dibimbing AI; AI berperan: (1) **Coach** — lesson-plan per task: konsep → langkah terkecil + alasan → review tiap langkah; (2) **Reviewer/Infra/Dokumentasi** — PR gate Backlog §12, tracker, decision/discovery log; (3) **Takeover dev** — lanjutkan bila owner stuck, lalu penjelasan retro.
+- Alur per task: READY → lesson plan (AI) → coding terbimbing (owner) → review (AI) → DONE / [stuck?] → takeover (AI).
+- Materi belajar per task yang selesai disimpan di **`Lessons/`**.
 
 ## Log Progres
 
@@ -15,6 +21,9 @@ Titik masuk utama untuk histori & progres semua pekerjaan yang dicatat via Obsid
 - **2026-08-24** — Repo dipindah dari `E:\DASHBOARD DIVISI` (exFAT, lambat & tanpa symlink) ke `C:\Projects\dashboard-divisi` (NTFS). Folder lama tetap ada sebagai cadangan; buka ulang vault Obsidian di lokasi baru.
 - **2026-08-24** — **FND-01 SELESAI**: monorepo pnpm (apps/web React+Vite, apps/api NestJS, packages/contracts, packages/db placeholder, scripts/) + gate lint/typecheck/test/build hijau semua.
 - **2026-08-24** — **FND-02 SELESAI**: validasi environment gagal-cepat via @nestjs/config (`NODE_ENV` local/test/staging, `PORT`), terbukti exit 1 saat runtime dengan env invalid; `.env.example` ter-commit, `.env*` tetap di-ignore; `DATABASE_URL` didokumentasikan untuk FND-05.
+- **2026-08-26** — Pembagian peran baru: owner coding FE/BE, AI coach/reviewer/takeover (lihat decision log). Konvensi `Lessons/` ditambahkan.
+- **2026-08-26** — Tracker **Dashboard Divisi MVP** dibuat: 80 task dari Backlog v0.1 dengan dependensi penuh, prioritas, owner, size & done-when (`Tasks/dashboard-divisi-mvp/`, id `proj-2026-08-26-p06j8t`). Blocker bisnis tertandai: REV-01, PERF-01, HR-01. FND-01 & FND-02 ditutup dengan bukti commit.
+- **2026-08-26** — Rekonsiliasi dual-copy repo: salinan E: (exFAT) di-reset ke origin/main agar identik dengan C: (NTFS, kanonik). Sesi berikutnya bekerja langsung di `C:\Projects\dashboard-divisi`; folder E: tinggal cadangan sampai diarsipkan.
 
 ## Keputusan Penting
 
@@ -28,7 +37,8 @@ Titik masuk utama untuk histori & progres semua pekerjaan yang dicatat via Obsid
 
 ## Cara Kerja Histori
 
-1. Task/project → catatan markdown di `Tasks/`
+1. Task/project → catatan markdown di `Tasks/` (tracker: `Tasks/dashboard-divisi-mvp/`)
 2. Update progres → Agent Log per task (berstempel waktu)
 3. Keputusan → *decision log*, temuan/error → *discovery log*
-4. Sesi baru → rekonstruksi state dari vault
+4. Materi belajar per task selesai → `Lessons/`
+5. Sesi baru → rekonstruksi state dari vault
