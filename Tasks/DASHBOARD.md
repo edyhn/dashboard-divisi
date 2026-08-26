@@ -6,20 +6,19 @@
 
 | Status | Count |
 |--------|-------|
-| pending | 5 |
+| pending | 4 |
 | blocked | 73 |
-| completed | 2 |
+| completed | 3 |
 | **Total** | **80** |
 
 ## Projects
 
-- [[Tasks\dashboard-divisi-mvp\proj-2026-08-26-p06j8t-dashboard-divisi-mvp|Dashboard Divisi MVP]] — 2/80 tasks (3%) — high
+- [[Tasks\dashboard-divisi-mvp\proj-2026-08-26-p06j8t-dashboard-divisi-mvp|Dashboard Divisi MVP]] — 3/80 tasks (4%) — high
 
 ## Pending Queue
 
 - [[Tasks\dashboard-divisi-mvp\task-2026-08-26-3k6wsw-perf-01-finalisasi-kpi-level-unit-indikator-bobot-scoring-ra|[PERF-01] Finalisasi KPI level/unit/indikator/bobot/scoring range]] — high
 - [[Tasks\dashboard-divisi-mvp\task-2026-08-26-v2tw9a-hr-01-dapatkan-contoh-export-sobathr-attendance-leave-overti|[HR-01] Dapatkan contoh export SobatHR (attendance/leave/overtime/payroll)]] — high
-- [[Tasks\dashboard-divisi-mvp\task-2026-08-26-5mldjp-fnd-03-nestjs-shell-api-v1-error-envelope-trace-id-health|[FND-03] NestJS shell /api/v1 + error envelope + trace_id + health]] — high
 - [[Tasks\dashboard-divisi-mvp\task-2026-08-26-oiy6x9-fnd-04-react-app-shell-routing-layout-error-boundary|[FND-04] React app shell, routing, layout, error boundary]] — high
 - [[Tasks\dashboard-divisi-mvp\task-2026-08-26-shjqbz-fnd-05-prisma-postgresql-migration-workflow-seed-aman|[FND-05] Prisma + PostgreSQL, migration workflow, seed aman]] — high
 
@@ -101,5 +100,6 @@
 
 ## Recently Completed
 
+- [[Tasks\dashboard-divisi-mvp\task-2026-08-26-5mldjp-fnd-03-nestjs-shell-api-v1-error-envelope-trace-id-health|[FND-03] NestJS shell /api/v1 + error envelope + trace_id + health]] — 2026-08-26T07:44:10.783Z
 - [[Tasks\dashboard-divisi-mvp\task-2026-08-26-y1gr7p-fnd-02-validasi-environment-gagal-cepat|[FND-02] Validasi environment gagal-cepat]] — 2026-08-26T05:05:02.469Z
 - [[Tasks\dashboard-divisi-mvp\task-2026-08-26-u86goq-fnd-01-monorepo-workspace-typescript|[FND-01] Monorepo/workspace TypeScript]] — 2026-08-26T05:04:40.422Z

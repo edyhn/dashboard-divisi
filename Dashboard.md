@@ -6,7 +6,7 @@ Titik masuk utama untuk histori & progres semua pekerjaan yang dicatat via Obsid
 
 | Project | Status | Progres |
 |---------|--------|---------|
-| Analytic & Reporting Dashboard Divisi (`proj-2026-08-26-p06j8t`) | R0 — Foundation | 2/80 task selesai (FND-01, FND-02); berikutnya FND-03/FND-04/PERF-01/HR-01 |
+| Analytic & Reporting Dashboard Divisi (`proj-2026-08-26-p06j8t`) | R0 — Foundation | 3/80 task selesai (FND-01–03); berikutnya FND-04/FND-05/PERF-01/HR-01 |
 
 ## Mode Kerja (per 2026-08-26)
 
@@ -24,6 +24,7 @@ Titik masuk utama untuk histori & progres semua pekerjaan yang dicatat via Obsid
 - **2026-08-26** — Pembagian peran baru: owner coding FE/BE, AI coach/reviewer/takeover (lihat decision log). Konvensi `Lessons/` ditambahkan.
 - **2026-08-26** — Tracker **Dashboard Divisi MVP** dibuat: 80 task dari Backlog v0.1 dengan dependensi penuh, prioritas, owner, size & done-when (`Tasks/dashboard-divisi-mvp/`, id `proj-2026-08-26-p06j8t`). Blocker bisnis tertandai: REV-01, PERF-01, HR-01. FND-01 & FND-02 ditutup dengan bukti commit.
 - **2026-08-26** — Rekonsiliasi dual-copy repo: salinan E: (exFAT) di-reset ke origin/main agar identik dengan C: (NTFS, kanonik). Sesi berikutnya bekerja langsung di `C:\Projects\dashboard-divisi`; folder E: tinggal cadangan sampai diarsipkan.
+- **2026-08-26** — **FND-03 SELESAI** (coaching + takeover): shell `/api/v1`, error envelope §2.2, trace_id per request, health endpoint; wiring diekstrak ke `app.setup.ts` untuk testability; 4 test kontrak HTTP baru (termasuk uji anti-bocor stack). Gates hijau 12/12. Ringkasan materi: `Lessons/FND-03-*`.
 
 ## Keputusan Penting
 
