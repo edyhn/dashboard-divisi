@@ -1,6 +1,7 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { RouteGuard } from './components/RouteGuard';
 import { AppLayout } from './layout/AppLayout';
 import DashboardPage from './pages/DashboardPage';
 import DemoStatesPage from './pages/DemoStatesPage';
@@ -27,13 +28,62 @@ export default function App() {
           <Routes>
             <Route element={<AppLayout />}>
               <Route path="/" element={<HomeRedirect />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/omzet" element={<OmzetPage />} />
-              <Route path="/target" element={<TargetPage />} />
-              <Route path="/penilaian" element={<PenilaianPage />} />
-              <Route path="/karyawan" element={<KaryawanPage />} />
-              <Route path="/workforce" element={<WorkforcePage />} />
-              <Route path="/laporan" element={<LaporanPage />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <RouteGuard capability="view:division">
+                    <DashboardPage />
+                  </RouteGuard>
+                }
+              />
+              <Route
+                path="/omzet"
+                element={
+                  <RouteGuard capability="write:revenue">
+                    <OmzetPage />
+                  </RouteGuard>
+                }
+              />
+              <Route
+                path="/target"
+                element={
+                  <RouteGuard capability="write:target">
+                    <TargetPage />
+                  </RouteGuard>
+                }
+              />
+              <Route
+                path="/penilaian"
+                element={
+                  <RouteGuard capability="write:assessment">
+                    <PenilaianPage />
+                  </RouteGuard>
+                }
+              />
+              <Route
+                path="/karyawan"
+                element={
+                  <RouteGuard capability="view:workforce">
+                    <KaryawanPage />
+                  </RouteGuard>
+                }
+              />
+              <Route
+                path="/workforce"
+                element={
+                  <RouteGuard capability="view:workforce">
+                    <WorkforcePage />
+                  </RouteGuard>
+                }
+              />
+              <Route
+                path="/laporan"
+                element={
+                  <RouteGuard capability="view:report">
+                    <LaporanPage />
+                  </RouteGuard>
+                }
+              />
               <Route path="/profil" element={<ProfilPage />} />
               <Route path="/demo" element={<DemoStatesPage />} />
             </Route>

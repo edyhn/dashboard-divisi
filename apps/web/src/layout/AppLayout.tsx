@@ -1,15 +1,18 @@
-import { NavLink, Outlet } from 'react-router';
+import { NavLink, Outlet } from 'react-router-dom';
 
 import { MENU_ITEMS } from '../mocks/session';
 import { useSession } from '../session/SessionContext';
+import { hasCapability } from '../session/capability';
 import { RoleSwitcher } from '../components/RoleSwitcher';
 
 export function AppLayout() {
   const { user } = useSession();
 
-  const visibleMenu = MENU_ITEMS.filter((item) =>
-    item.roles.includes(user.role),
-  );
+  const visibleMenu = MENU_ITEMS.filter((item) => {
+    if (!item.roles.includes(user.role)) return false;
+    if (item.capability && !hasCapability(user.role, item.capability)) return false;
+    return true;
+  });
 
   return (
     <div className="min-h-screen bg-surface">
