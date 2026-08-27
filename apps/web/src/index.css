@@ -1,0 +1,21 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+
+@theme {
+  --color-primary: #2563eb;
+  --color-primary-dark: #1d4ed8;
+  --color-navy: #0f172a;
+  --color-surface: #f8fafc;
+  --color-line: #cbd5e1;
+  --color-success: #15803d;
+  --color-warning: #b45309;
+  --color-danger: #b91c1c;
+  --color-info: #7c3aed;
+
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, Arial, sans-serif;
+
+  --radius-card: 8px;
+  --radius-input: 6px;
+
+  --shadow-card: 0 1px 2px 0 rgb(15 23 42 / 0.06);
+}
