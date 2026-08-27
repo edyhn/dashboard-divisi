@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuditModule } from './audit/audit.module';
 import { AuthModule } from './auth/auth.module';
 import { OrgModule } from './org/org.module';
+import { BodModule } from './bod/bod.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { OrgModule } from './org/org.module';
     HealthModule,
     AuthModule,
     OrgModule,
+    BodModule,
   ],
   controllers: [],
   providers: [],
