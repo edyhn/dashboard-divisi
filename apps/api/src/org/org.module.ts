@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 import { EmployeeService } from './employee.service';
+import { UserScopeService } from './userscope.service';
 
 @Module({
-  providers: [EmployeeService],
-  exports: [EmployeeService],
+  providers: [EmployeeService, UserScopeService],
+  exports: [EmployeeService, UserScopeService],
 })
 export class OrgModule {}

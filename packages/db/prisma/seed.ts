@@ -90,13 +90,28 @@ async function main() {
     console.log(`  upsert User ${u.email} (${u.role}${u.divisionCode ? '/' + u.divisionCode : ''})`);
   }
 
+  // Seed UserScopes 14 (Manager+Admin) — BOD no scope (all)
+  for (const u of USERS) {
+    if (!u.divisionCode) continue;
+    const user = await prisma.user.findUnique({ where: { email: u.email } });
+    const division = await prisma.division.findUnique({ where: { code: u.divisionCode } });
+    if (!user || !division) throw new Error(`User or Division not found for ${u.email}`);
+    await prisma.userScope.upsert({
+      where: { userId_divisionId: { userId: user.id, divisionId: division.id } },
+      update: {},
+      create: { userId: user.id, divisionId: division.id },
+    });
+    console.log(`  upsert UserScope ${u.email} -> ${u.divisionCode}`);
+  }
+
   const divCount = await prisma.division.count();
   const outletCount = await prisma.outlet.count();
   const userCount = await prisma.user.count();
-  console.log(`Seed done — divisions=${divCount}, outlets=${outletCount}, users=${userCount}`);
+  const scopeCount = await prisma.userScope.count();
+  console.log(`Seed done — divisions=${divCount}, outlets=${outletCount}, users=${userCount}, scopes=${scopeCount}`);
 
-  if (divCount !== 7 || outletCount !== 7 || userCount !== 17) {
-    throw new Error(`Seed validation failed: expected 7/7/17, got ${divCount}/${outletCount}/${userCount}`);
+  if (divCount !== 7 || outletCount !== 7 || userCount !== 17 || scopeCount !== 14) {
+    throw new Error(`Seed validation failed: expected 7/7/17/14, got ${divCount}/${outletCount}/${userCount}/${scopeCount}`);
   }
   console.log(`Default password for all seeded users: ${DEFAULT_PASSWORD}`);
 }
