@@ -6,7 +6,7 @@ Titik masuk utama untuk histori & progres semua pekerjaan yang dicatat via Obsid
 
 | Project | Status | Progres |
 |---------|--------|---------|
-| Analytic & Reporting Dashboard Divisi (`proj-2026-08-26-p06j8t`) | R0 — Foundation | 3/80 task selesai (FND-01–03); berikutnya FND-04/FND-05/PERF-01/HR-01 |
+| Analytic & Reporting Dashboard Divisi (`proj-2026-08-26-p06j8t`) | R0 — Foundation (Fase 0) | 3/80 selesai (FND-01–03); **FND-04 berjalan 5/8 langkah** — sisa: RouteGuard, /demo, commit | **NEW 2026-08-27:** role-based MVP 7 divisi (Wrapping, Cellular, Refleksi, Minimarket, FnB, Finance, Money Changer), 17 akun (3 BOD lintas + 7 Manager 1:1 + 7 Admin 1:1), urutan BOD(01+02+05) → Manager → Admin, stop MVP di 3 role |
 
 ## Mode Kerja (per 2026-08-26)
 
@@ -25,6 +25,9 @@ Titik masuk utama untuk histori & progres semua pekerjaan yang dicatat via Obsid
 - **2026-08-26** — Tracker **Dashboard Divisi MVP** dibuat: 80 task dari Backlog v0.1 dengan dependensi penuh, prioritas, owner, size & done-when (`Tasks/dashboard-divisi-mvp/`, id `proj-2026-08-26-p06j8t`). Blocker bisnis tertandai: REV-01, PERF-01, HR-01. FND-01 & FND-02 ditutup dengan bukti commit.
 - **2026-08-26** — Rekonsiliasi dual-copy repo: salinan E: (exFAT) di-reset ke origin/main agar identik dengan C: (NTFS, kanonik). Sesi berikutnya bekerja langsung di `C:\Projects\dashboard-divisi`; folder E: tinggal cadangan sampai diarsipkan.
 - **2026-08-26** — **FND-03 SELESAI** (coaching + takeover): shell `/api/v1`, error envelope §2.2, trace_id per request, health endpoint; wiring diekstrak ke `app.setup.ts` untuk testability; 4 test kontrak HTTP baru (termasuk uji anti-bocor stack). Gates hijau 12/12. Ringkasan materi: `Lessons/FND-03-*`.
+- **2026-08-26** — **FND-04 berjalan (5/8)**, mode go-live coaching: owner coding Langkah 1-3 (router+9 halaman, SessionContext mock persist, AppLayout sidebar/header/RoleSwitcher, setup Tailwind v4) + AI takeover 4-5 (ErrorBoundary, komponen state Loading/Empty/Error/NoAccess). Test 8/8 hijau; live preview `localhost:5173`. Sesi ditutup sebelum Langkah 6-8; kode apps/web **belum di-commit**.
+- **2026-08-26** — ⚠️ **Drive E: ter-drop di akhir sesi** (sejak awal HealthStatus=Warning, exFAT). Commit vault terakhir di E: (`e89783c`) belum ter-push; catatan pause direkonstruksi manual ke vault C: ini. **E: BUKAN lokasi kerja lagi — wajib C:.**
+- **2026-08-27** — **Re-plan role-based disetujui:** MVP dipersempit ke 3 role (BOD 3 lintas 7 divisi → Manager 7 → Admin 7 strict 1:1), total 17 akun, 7 divisi (Finance≠Money Changer), Eksekutif MVP = BOD-01+02+05, Fase 0 (FND-04+05+07/08 P0) tetap wajib. BOD 3 identik unrestricted (pembagian tugas ditunda). Tracker `proj-2026-08-26-p06j8t` di-update.
 
 ## Keputusan Penting
 
@@ -32,6 +35,7 @@ Titik masuk utama untuk histori & progres semua pekerjaan yang dicatat via Obsid
 - **2026-08-24** — Backup vault via GitHub (private), didorong setiap milestone penting.
 - **2026-08-24** — Satu website untuk semua divisi/role; pembeda hanya login (role + capability + scope server-side). Sesuai PRD §Peta Produk & API Contract §3.
 - **2026-08-24** — 5 role sesuai dokumen: BOD, SUPERADMIN, HRD, MANAGER, USER. Finance TIDAK menjadi role sistem (bisa direview nanti via decision log).
+- **2026-08-27** — **Revisi role/divisi MVP (user approved):** 7 divisi (Wrapping, Cellular, Refleksi/Reflexy, Minimarket, FnB, Finance, Money Changer), 3 BOD lintas semua divisi (identik, pembagian ditunda), 7 Manager (1 per divisi), 7 Admin (1 per divisi strict 1:1) = 17 akun. Urutan BOD(01+02+05) → Manager → Admin. Finance & Money Changer divisi terpisah.
 - **2026-08-24** — Tooling: pnpm workspaces 11.x. Struktur dipisah per keputusan owner: apps/web (frontend), apps/api (backend), packages/db (Prisma — deviasi dari ARD §15.1 yang menaruh prisma di dalam api), packages/contracts (tipe bersama), scripts/, Documents/.
 - **2026-08-24** — Lokasi repo wajib di filesystem NTFS. exFAT tidak mendukung symlink/hardlink sehingga pnpm tidak berfungsi normal.
 - **2026-08-24** — Inkonsistensi status antar-dokumen (impor/rekonsiliasi/penilaian) mengikuti Data Dictionary v0.2 + API Contract v0.1 sebagai baseline teknis; deviasi PRD dicatat, tidak diam-diam dipilih.

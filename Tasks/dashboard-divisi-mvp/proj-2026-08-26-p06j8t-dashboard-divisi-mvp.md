@@ -30,13 +30,15 @@ escalation_status: none
 
 Tracker implementasi MVP Analytic & Reporting Dashboard Divisi berdasarkan Development Backlog v0.1 (build-ready delivery plan). Stack: TypeScript, React+Vite, NestJS, Prisma, PostgreSQL; modular monolith REST /api/v1.
 
-RELEASE MAP: R0 Foundation (FND) → R1 Manager Minimarket (ORG+REV+DASH) → R2 Target & Performance (TGT+PERF) → R3 Workforce/SobatHR (HR) → R4 BOD & Expansion (BOD) → R5 Production (OPS).
+RELEASE MAP (update 2026-08-27, role-based — user approved): R0 Foundation (FND-01..10, Fase 0 wajib) → R1 Eksekutif/BOD (BOD-01+02+05 MVP, 3 BOD lintas 7 divisi) → R2 Manager per divisi (7 manager, 1 per divisi) → R3 Admin per divisi (7 admin strict 1:1) — STOP MVP. R4..R5 (HR/TGT/PERF full, BOD-03/04/06/07/08 polish, OPS) ditunda post-MVP. Skala: 7 divisi (Wrapping, Cellular, Refleksi/Reflexy, Minimarket, FnB, Finance, Money Changer — Finance≠Money Changer), 17 akun (3 BOD unrestricted identik, 7 Manager, 7 Admin). Fase 0 tetap wajib sebelum BOD demo real (mock demo berlabel §11.1 diperbolehkan untuk preview).
 
 ATURAN PENTING: (1) Task BLOCKED tidak boleh dianggap selesai dengan data buatan; (2) FND-07 & FND-08 adalah gate P0 — UI yang menyembunyikan menu tanpa policy server-side tidak boleh dilanjutkan sebagai solusi akses; (3) Blocker bisnis eksplisit: REV-01 (rumus omzet), PERF-01 (KPI/bobot), HR-01 (contoh export SobatHR); parser/posting/skor/mapping tidak boleh final sebelum blocker tersebut selesai; (4) Definition of Done mengikuti Backlog §1.4; PR gate mengikuti §12.2.
 
 MODE KERJA (decision 2026-08-26): owner coding dibimbing AI coach (lesson-plan → langkah terkecil → review); AI takeover jika diminta. Ringkasan materi disimpan di Lessons/.
 
 STATUS AWAL: FND-01 ✅ commit bc8724e, FND-02 ✅ commit 99d9325 (repo kanonik C:\Projects\dashboard-divisi, remote github.com/edyhn/obsidian-vault).
+
+UPDATE 2026-08-27 (build): Urutan eksekusi diubah dari release-map backlog ke role-based (BOD → Manager per divisi → Admin per divisi), 7 divisi, 17 akun, Fase 0 tetap. Keputusan: BOD 3 identik unrestricted (pembagian tugas antar 3 BOD ditunda), Manager/Admin strict 1:1 per divisi, MVP stop di 3 role, Eksekutif MVP = BOD-01+02+05.
 
 ## Sub-Tasks
 
