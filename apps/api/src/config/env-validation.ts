@@ -6,6 +6,7 @@ export interface AppConfig {
   NODE_ENV: NodeEnvironment;
   PORT: number;
   DATABASE_URL: string;
+  JWT_SECRET: string;
 }
 
 function collectEnvErrors(config: Record<string, unknown>): string[] {
@@ -37,6 +38,15 @@ function collectEnvErrors(config: Record<string, unknown>): string[] {
     errors.push(`DATABASE_URL harus diawali postgresql:// atau postgres:// (diterima: ${String(dbUrlRaw).slice(0, 20)}...)`);
   }
 
+  const jwtRaw = config.JWT_SECRET;
+  if (typeof jwtRaw !== 'string' || jwtRaw.trim() === '') {
+    if (!isTest) {
+      errors.push('JWT_SECRET wajib diisi (minimal 32 karakter, contoh: ganti-jwt-secret-min-32-karakter-di-env-lokal)');
+    }
+  } else if (jwtRaw.trim().length < 32) {
+    errors.push(`JWT_SECRET minimal 32 karakter (diterima: ${String(jwtRaw).length} karakter)`);
+  }
+
   return errors;
 }
 
@@ -52,9 +62,15 @@ export function validateEnv(config: Record<string, unknown>): AppConfig {
       ? String(config.DATABASE_URL)
       : 'postgresql://user:password@localhost:5432/dashboard_divisi_test';
 
+  const jwtSecret =
+    typeof config.JWT_SECRET === 'string' && config.JWT_SECRET.trim() !== ''
+      ? String(config.JWT_SECRET)
+      : 'test-jwt-secret-min-32-karakter-untuk-automated-test-1234';
+
   return {
     NODE_ENV: (config.NODE_ENV ?? 'local') as NodeEnvironment,
     PORT: Number(config.PORT ?? '3000'),
     DATABASE_URL: databaseUrl,
+    JWT_SECRET: jwtSecret,
   };
 }
