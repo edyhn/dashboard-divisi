@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { ApiError } from '../common/api-error';
+import { AuditService } from '../audit/audit.service';
 import type { JwtPayload } from './jwt-auth.guard';
 
 // Capability map untuk 7 divisi MVP — BOD all, Manager/Admin strict 1:1
@@ -11,6 +12,8 @@ const ROLE_CAPABILITIES: Record<string, string[]> = {
 
 @Injectable()
 export class PolicyService {
+  constructor(@Optional() @Inject(AuditService) private readonly audit?: AuditService) {}
+
   hasCapability(user: JwtPayload, capability: string): boolean {
     const caps = ROLE_CAPABILITIES[user.role] ?? [];
     return caps.includes('*') || caps.includes(capability);
@@ -18,6 +21,15 @@ export class PolicyService {
 
   assertCapability(user: JwtPayload, capability: string): void {
     if (!this.hasCapability(user, capability)) {
+      this.audit?.log({
+        actorId: user.sub ?? null,
+        actorEmail: user.email ?? null,
+        actorRole: user.role,
+        action: 'policy.forbidden_capability',
+        entity: 'Policy',
+        divisionCode: user.divisionCode ?? null,
+        metadata: { capability, role: user.role },
+      }).catch(() => {});
       throw new ApiError('FORBIDDEN_CAPABILITY', `Role ${user.role} tidak memiliki capability ${capability}`);
     }
   }
@@ -34,6 +46,15 @@ export class PolicyService {
 
   assertDivisionScope(user: JwtPayload, divisionCode: string | null | undefined): void {
     if (!this.canAccessDivision(user, divisionCode)) {
+      this.audit?.log({
+        actorId: user.sub ?? null,
+        actorEmail: user.email ?? null,
+        actorRole: user.role,
+        action: 'policy.scope_violation',
+        entity: 'Division',
+        divisionCode: divisionCode ?? null,
+        metadata: { requested: divisionCode, userDivision: user.divisionCode },
+      }).catch(() => {});
       throw new ApiError('SCOPE_VIOLATION', `Akses ditolak untuk divisi ${divisionCode} (user ${user.role}/${user.divisionCode ?? 'ALL'})`);
     }
   }

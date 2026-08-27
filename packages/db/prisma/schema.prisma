@@ -59,3 +59,25 @@ model User {
   @@index([divisionCode])
   @@map("users")
 }
+
+// FND-08: Audit append-only — actor/entity/event/time/scope tanpa payload sensitif
+model AuditEvent {
+  id           String   @id @default(cuid())
+  actorId      String?
+  actorEmail   String?
+  actorRole    String?
+  action       String // e.g., auth.login, auth.logout, policy.scope_violation
+  entity       String // e.g., User, Division, Auth
+  entityId     String?
+  divisionCode String?
+  traceId      String?
+  metadata     Json? // sanitized, never password/token
+  createdAt    DateTime @default(now())
+
+  @@index([actorId])
+  @@index([action])
+  @@index([entity])
+  @@index([divisionCode])
+  @@index([createdAt])
+  @@map("audit_events")
+}

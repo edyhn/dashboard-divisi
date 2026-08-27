@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
+import { AuditService } from '../audit/audit.service';
 import type { JwtPayload } from './jwt-auth.guard';
 
 // Fallback in-memory 17 akun untuk test tanpa DB (hash untuk Password123! via bcrypt 10)
@@ -35,6 +36,7 @@ export class AuthService {
     @Inject(PrismaService) private readonly prisma: PrismaService,
     @Inject(JwtService) private readonly jwtService: JwtService,
     @Inject(ConfigService) private readonly configService: ConfigService,
+    @Inject(AuditService) private readonly audit: AuditService,
   ) {}
 
   private async findUserByEmail(email: string) {
@@ -81,6 +83,16 @@ export class AuthService {
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: this.configService.get<string>('JWT_SECRET'),
       expiresIn: '8h',
+    });
+    await this.audit.log({
+      actorId: user.id,
+      actorEmail: user.email,
+      actorRole: user.role,
+      action: 'auth.login',
+      entity: 'User',
+      entityId: user.id,
+      divisionCode: user.divisionCode,
+      metadata: { email: user.email },
     });
     return {
       accessToken,
