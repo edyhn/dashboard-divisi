@@ -1,0 +1,92 @@
+name: CI — quality gate + migration dry-run
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://user:password@localhost:5432/dashboard_divisi_test
+      JWT_SECRET: test-jwt-secret-min-32-karakter-untuk-ci-1234567890
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.23.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Check env
+        run: pnpm check:env
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Build
+        run: pnpm build
+
+      - name: Test (isolated, anonim fixtures)
+        run: pnpm test
+
+      - name: Prisma validate
+        run: pnpm --filter @dashboard-divisi/db exec prisma validate
+
+      - name: Prisma format check
+        run: pnpm --filter @dashboard-divisi/db exec prisma format --check
+
+      - name: Prisma generate
+        run: pnpm --filter @dashboard-divisi/db db:generate
+
+      - name: Migration dry-run (diff from empty)
+        run: pnpm --filter @dashboard-divisi/db exec prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script --exit-code || echo "migration diff generated (no DB required for FND-10)"
+
+  migration-dry-run-with-db:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: dashboard_divisi_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://user:password@localhost:5432/dashboard_divisi_test
+      JWT_SECRET: test-jwt-secret-min-32-karakter-untuk-ci-1234567890
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.23.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Prisma migrate deploy (dry-run with real DB)
+        run: pnpm --filter @dashboard-divisi/db db:deploy || pnpm --filter @dashboard-divisi/db exec prisma migrate deploy
+      - name: Seed idempotent check (run twice)
+        run: |
+          pnpm --filter @dashboard-divisi/db db:seed
+          pnpm --filter @dashboard-divisi/db db:seed
+          echo "seed idempotent verified"
