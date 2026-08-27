@@ -20,6 +20,7 @@ model Division {
   updatedAt DateTime @updatedAt
 
   outlets Outlet[]
+  assignments EmployeeAssignment[]
 
   @@map("divisions")
 }
@@ -33,6 +34,7 @@ model Outlet {
   isActive   Boolean  @default(true)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  assignments EmployeeAssignment[]
 
   @@index([divisionId])
   @@map("outlets")
@@ -58,6 +60,40 @@ model User {
   @@index([role])
   @@index([divisionCode])
   @@map("users")
+}
+
+// ORG-02: Employee & Assignment historis — effectiveFrom/effectiveTo tidak overlap
+model Employee {
+  id        String   @id @default(cuid())
+  code      String   @unique // NIK anonim
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assignments EmployeeAssignment[]
+
+  @@map("employees")
+}
+
+model EmployeeAssignment {
+  id            String    @id @default(cuid())
+  employeeId    String
+  employee      Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  divisionId    String
+  division      Division  @relation(fields: [divisionId], references: [id])
+  outletId      String?
+  outlet        Outlet?   @relation(fields: [outletId], references: [id])
+  effectiveFrom DateTime
+  effectiveTo   DateTime? // null = current assignment
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([employeeId])
+  @@index([divisionId])
+  @@index([effectiveFrom])
+  @@index([effectiveTo])
+  @@map("employee_assignments")
 }
 
 // FND-08: Audit append-only — actor/entity/event/time/scope tanpa payload sensitif

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, expect, it } from 'vitest';
 import { PolicyService } from '../auth/policy.service';
 import type { JwtPayload } from '../auth/jwt-auth.guard';
