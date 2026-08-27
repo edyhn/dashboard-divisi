@@ -5,6 +5,7 @@ export type NodeEnvironment = (typeof ALLOWED_NODE_ENVIRONMENTS)[number];
 export interface AppConfig {
   NODE_ENV: NodeEnvironment;
   PORT: number;
+  DATABASE_URL: string;
 }
 
 function collectEnvErrors(config: Record<string, unknown>): string[] {
@@ -26,6 +27,16 @@ function collectEnvErrors(config: Record<string, unknown>): string[] {
     errors.push(`PORT harus bilangan bulat 1-65535 (diterima: ${String(portRaw)})`);
   }
 
+  const dbUrlRaw = config.DATABASE_URL;
+  const isTest = nodeEnvRaw === 'test';
+  if (typeof dbUrlRaw !== 'string' || dbUrlRaw.trim() === '') {
+    if (!isTest) {
+      errors.push('DATABASE_URL wajib diisi (contoh: postgresql://user:password@localhost:5432/dashboard_divisi)');
+    }
+  } else if (!dbUrlRaw.startsWith('postgresql://') && !dbUrlRaw.startsWith('postgres://')) {
+    errors.push(`DATABASE_URL harus diawali postgresql:// atau postgres:// (diterima: ${String(dbUrlRaw).slice(0, 20)}...)`);
+  }
+
   return errors;
 }
 
@@ -36,8 +47,14 @@ export function validateEnv(config: Record<string, unknown>): AppConfig {
     throw new Error(`Validasi environment gagal:\n- ${errors.join('\n- ')}`);
   }
 
+  const databaseUrl =
+    typeof config.DATABASE_URL === 'string' && config.DATABASE_URL.trim() !== ''
+      ? String(config.DATABASE_URL)
+      : 'postgresql://user:password@localhost:5432/dashboard_divisi_test';
+
   return {
     NODE_ENV: (config.NODE_ENV ?? 'local') as NodeEnvironment,
     PORT: Number(config.PORT ?? '3000'),
+    DATABASE_URL: databaseUrl,
   };
 }
