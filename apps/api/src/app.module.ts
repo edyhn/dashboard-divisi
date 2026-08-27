@@ -7,6 +7,7 @@ import { AuditModule } from './audit/audit.module';
 import { AuthModule } from './auth/auth.module';
 import { OrgModule } from './org/org.module';
 import { BodModule } from './bod/bod.module';
+import { DivisionConfigModule } from './division-config/division-config.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { BodModule } from './bod/bod.module';
     AuthModule,
     OrgModule,
     BodModule,
+    DivisionConfigModule,
   ],
   controllers: [],
   providers: [],

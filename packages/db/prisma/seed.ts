@@ -104,14 +104,37 @@ async function main() {
     console.log(`  upsert UserScope ${u.email} -> ${u.divisionCode}`);
   }
 
+  // Seed DivisionConfig 7 — config-driven, tambah divisi baru pakai shell sama
+  const DIVISION_CONFIGS = {
+    WRAP: { modules: ['dashboard', 'revenue', 'target', 'performance'], kpis: ['revenue.gross', 'target.achievement'] },
+    CELL: { modules: ['dashboard', 'revenue', 'target', 'performance'], kpis: ['revenue.gross', 'target.achievement'] },
+    REFL: { modules: ['dashboard', 'revenue', 'performance'], kpis: ['revenue.gross', 'performance.score'] },
+    MINI: { modules: ['dashboard', 'revenue', 'target', 'performance', 'workforce'], kpis: ['revenue.gross', 'revenue.net', 'target.achievement'] },
+    FNB: { modules: ['dashboard', 'revenue', 'target'], kpis: ['revenue.gross', 'target.achievement'] },
+    FIN: { modules: ['dashboard', 'revenue', 'workforce'], kpis: ['revenue.gross', 'workforce.count'] },
+    MC: { modules: ['dashboard', 'forex'], kpis: ['forex.volume', 'forex.spread'] },
+  } as const;
+  for (const d of DIVISIONS) {
+    const division = await prisma.division.findUnique({ where: { code: d.code } });
+    if (!division) throw new Error(`Division not found ${d.code}`);
+    const cfg = DIVISION_CONFIGS[d.code as keyof typeof DIVISION_CONFIGS];
+    await prisma.divisionConfig.upsert({
+      where: { divisionId: division.id },
+      update: { enabledModules: cfg.modules as any, enabledKpis: cfg.kpis as any, isActive: true },
+      create: { divisionId: division.id, enabledModules: cfg.modules as any, enabledKpis: cfg.kpis as any, isActive: true },
+    });
+    console.log(`  upsert DivisionConfig ${d.code} modules=${cfg.modules.join(',')}`);
+  }
+
   const divCount = await prisma.division.count();
   const outletCount = await prisma.outlet.count();
   const userCount = await prisma.user.count();
   const scopeCount = await prisma.userScope.count();
-  console.log(`Seed done — divisions=${divCount}, outlets=${outletCount}, users=${userCount}, scopes=${scopeCount}`);
+  const configCount = await prisma.divisionConfig.count();
+  console.log(`Seed done — divisions=${divCount}, outlets=${outletCount}, users=${userCount}, scopes=${scopeCount}, configs=${configCount}`);
 
-  if (divCount !== 7 || outletCount !== 7 || userCount !== 17 || scopeCount !== 14) {
-    throw new Error(`Seed validation failed: expected 7/7/17/14, got ${divCount}/${outletCount}/${userCount}/${scopeCount}`);
+  if (divCount !== 7 || outletCount !== 7 || userCount !== 17 || scopeCount !== 14 || configCount !== 7) {
+    throw new Error(`Seed validation failed: expected 7/7/17/14/7, got ${divCount}/${outletCount}/${userCount}/${scopeCount}/${configCount}`);
   }
   console.log(`Default password for all seeded users: ${DEFAULT_PASSWORD}`);
 }

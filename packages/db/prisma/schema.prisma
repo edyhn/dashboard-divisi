@@ -22,6 +22,7 @@ model Division {
   outlets Outlet[]
   assignments EmployeeAssignment[]
   userScopes  UserScope[]
+  config      DivisionConfig?
 
   @@map("divisions")
 }
@@ -113,6 +114,20 @@ model EmployeeAssignment {
   @@index([effectiveFrom])
   @@index([effectiveTo])
   @@map("employee_assignments")
+}
+
+// BOD-05: DivisionConfig — config-driven dashboard/module/KPI per divisi (7 divisi, tambah tanpa deploy)
+model DivisionConfig {
+  id             String   @id @default(cuid())
+  divisionId     String   @unique
+  division       Division @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+  enabledModules String[] // e.g., ["dashboard","revenue","target","performance","workforce"]
+  enabledKpis    String[] // e.g., ["revenue.gross","target.achievement"]
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("division_configs")
 }
 
 // FND-08: Audit append-only — actor/entity/event/time/scope tanpa payload sensitif
