@@ -61,9 +61,13 @@ describe('FND-06 Auth/session/logout — UAT-ACC-08', () => {
       headers: { Authorization: `Bearer ${token}`, Cookie: cookie },
     });
     expect(logoutRes.status).toBe(200);
-    // after logout, cookie cleared — try without token should 401
+    const replayRes = await fetch(`${baseUrl}/api/v1/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    expect(replayRes.status).toBe(401);
+
     const meRes = await fetch(`${baseUrl}/api/v1/auth/me`, {
-      headers: { Cookie: '' }, // no token
+      headers: { Cookie: '' },
     });
     expect(meRes.status).toBe(401);
     const body = await meRes.json() as any;

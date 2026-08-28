@@ -40,6 +40,8 @@ STATUS AWAL: FND-01 ✅ commit bc8724e, FND-02 ✅ commit 99d9325 (repo kanonik 
 
 UPDATE 2026-08-27 (build): Urutan eksekusi diubah dari release-map backlog ke role-based (BOD → Manager per divisi → Admin per divisi), 7 divisi, 17 akun, Fase 0 tetap. Keputusan: BOD 3 identik unrestricted (pembagian tugas antar 3 BOD ditunda), Manager/Admin strict 1:1 per divisi, MVP stop di 3 role, Eksekutif MVP = BOD-01+02+05.
 
+UPDATE 2026-08-27 (restart note): Fase 0 selesai penuh (`FND-01..10`) dan Fase 1 BOD MVP selesai (`ORG-01..06`, `BOD-01`, `BOD-02`, `BOD-05`). Status teknis: 7 divisi aktif (`WRAP/CELL/REFL/MINI/FNB/FIN/MC`), 17 akun (`3 BOD unrestricted + 7 Manager + 7 Admin strict 1:1`), web memakai filter URL + route/menu guard capability, backend memakai auth JWT + policy/scope server-side + audit append-only + CI gate. Semua gate lokal terakhir hijau: `pnpm lint`, `pnpm typecheck`, `pnpm build`, `pnpm test`. Fokus sesi berikutnya: Manager/Admin scoped flow (`REV-*`, `DASH-*`), kemungkinan mulai dari `REV-01/REV-02` atau `DASH-03`.
+
 ## Sub-Tasks
 
 - [ ] task-2026-08-26-u86goq — [FND-01] Monorepo/workspace TypeScript
@@ -126,3 +128,5 @@ UPDATE 2026-08-27 (build): Urutan eksekusi diubah dari release-map backlog ke ro
 ## Agent Log
 
 <!-- Project-level progress updates -->
+
+- 2026-08-27 15:35 — Restart checkpoint: docs re-plan 7 divisi/17 akun selesai; commit utama hingga checkpoint ini: `76c0920` (docs re-plan), `84d526b` (FND-04), `20160d8` (FND-05), `45962da` (FND-06 API), `6c16461` (FND-07), `b666272` (FND-08), `7e124b6` (FND-09), `7f73dde` (FND-10), `5964a84` (ORG-01), `a807653` (ORG-02), `fa9ac8f` (ORG-03), `ff53636` (ORG-04), `330d1b9` (ORG-05), `b711de9` (ORG-06), `2de7c59` (BOD-01), `b5e8156` (BOD-02), `f9ea3d4` (BOD-05). Next: Manager/Admin per divisi (`REV-*`, `DASH-*`).

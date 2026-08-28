@@ -6,7 +6,7 @@ Titik masuk utama untuk histori & progres semua pekerjaan yang dicatat via Obsid
 
 | Project | Status | Progres |
 |---------|--------|---------|
-| Analytic & Reporting Dashboard Divisi (`proj-2026-08-26-p06j8t`) | R0 — Foundation (Fase 0) | 3/80 selesai (FND-01–03); **FND-04 berjalan 5/8 langkah** — sisa: RouteGuard, /demo, commit | **NEW 2026-08-27:** role-based MVP 7 divisi (Wrapping, Cellular, Refleksi, Minimarket, FnB, Finance, Money Changer), 17 akun (3 BOD lintas + 7 Manager 1:1 + 7 Admin 1:1), urutan BOD(01+02+05) → Manager → Admin, stop MVP di 3 role |
+| Analytic & Reporting Dashboard Divisi (`proj-2026-08-26-p06j8t`) | R1 — BOD MVP selesai, lanjut Manager/Admin | Foundation `FND-01..10` selesai; `ORG-01..06` selesai; `BOD-01+02+05` selesai; gate `lint/typecheck/build/test` hijau | **Role-based MVP 7 divisi / 17 akun aktif. Next:** Manager/Admin scoped flow (`REV-*`, `DASH-*`) |
 
 ## Mode Kerja (per 2026-08-26)
 
@@ -28,6 +28,8 @@ Titik masuk utama untuk histori & progres semua pekerjaan yang dicatat via Obsid
 - **2026-08-26** — **FND-04 berjalan (5/8)**, mode go-live coaching: owner coding Langkah 1-3 (router+9 halaman, SessionContext mock persist, AppLayout sidebar/header/RoleSwitcher, setup Tailwind v4) + AI takeover 4-5 (ErrorBoundary, komponen state Loading/Empty/Error/NoAccess). Test 8/8 hijau; live preview `localhost:5173`. Sesi ditutup sebelum Langkah 6-8; kode apps/web **belum di-commit**.
 - **2026-08-26** — ⚠️ **Drive E: ter-drop di akhir sesi** (sejak awal HealthStatus=Warning, exFAT). Commit vault terakhir di E: (`e89783c`) belum ter-push; catatan pause direkonstruksi manual ke vault C: ini. **E: BUKAN lokasi kerja lagi — wajib C:.**
 - **2026-08-27** — **Re-plan role-based disetujui:** MVP dipersempit ke 3 role (BOD 3 lintas 7 divisi → Manager 7 → Admin 7 strict 1:1), total 17 akun, 7 divisi (Finance≠Money Changer), Eksekutif MVP = BOD-01+02+05, Fase 0 (FND-04+05+07/08 P0) tetap wajib. BOD 3 identik unrestricted (pembagian tugas ditunda). Tracker `proj-2026-08-26-p06j8t` di-update.
+- **2026-08-27** — **Fase 0 selesai penuh**: `FND-04` web shell, `FND-05` Prisma/PostgreSQL + seed 7 divisi, `FND-06` auth/session/logout/reset, `FND-07` policy/scope server-side, `FND-08` audit append-only, `FND-09` test harness anonim, `FND-10` CI quality gate + migration dry-run. Semua gate lokal hijau.
+- **2026-08-27** — **Fase 1 BOD MVP selesai**: `ORG-01` config divisi/outlet tanpa deploy, `ORG-02` EmployeeAssignment historis no-overlap, `ORG-03` UserScope 17 akun, `ORG-04` read model scope server, `ORG-05` filter state di URL, `ORG-06` menu/route guard per capability, `BOD-01` executive read model + KPI compatibility, `BOD-02` executive overview source/period/freshness/drill-down, `BOD-05` config-driven module/KPI per divisi. Next sprint: Manager/Admin scoped flow (`REV-*`, `DASH-*`).
 
 ## Keputusan Penting
 

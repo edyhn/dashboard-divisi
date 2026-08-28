@@ -26,8 +26,8 @@ describe('ORG-06 Menu per capability', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText('Data Omzet')).toBeTruthy();
-    expect(screen.getByText('Target & Realisasi')).toBeTruthy();
+    expect(screen.getAllByText('Data Omzet').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Target & Realisasi').length).toBeGreaterThan(0);
     expect(screen.queryByText('Penilaian Performa')).toBeNull();
   });
 
@@ -46,7 +46,29 @@ describe('ORG-06 Menu per capability', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText('Laporan')).toBeTruthy();
+    expect(screen.getAllByText('Laporan').length).toBeGreaterThan(0);
     expect(screen.queryByText('Data Omzet')).toBeNull();
+  });
+
+  it('menampilkan breadcrumb, scope, dan freshness shell', () => {
+    localStorage.setItem('dashboard-divisi.role-demo', 'MANAGER');
+    localStorage.setItem('dashboard-divisi.division-demo', 'WRAP');
+
+    render(
+      <MemoryRouter initialEntries={['/target']}>
+        <SessionProvider>
+          <Routes>
+            <Route element={<AppLayout />}>
+              <Route path="/target" element={<div>child</div>} />
+            </Route>
+          </Routes>
+        </SessionProvider>
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText('Breadcrumb')).toBeTruthy();
+    expect(screen.getAllByText('Target & Realisasi').length).toBeGreaterThan(0);
+    expect(screen.getByText('MANAGER · WRAP')).toBeTruthy();
+    expect(screen.getByText('Mock sinkron 10 menit lalu')).toBeTruthy();
   });
 });

@@ -6,6 +6,7 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { describe, expect, it, beforeAll, afterAll } from 'vitest';
 import { PrismaModule } from '../prisma/prisma.module';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { TokenRevocationService } from './auth.service';
 import { PolicyService } from './policy.service';
 import { ScopeGuard } from './scope.guard';
 import { CapabilityGuard } from './capability.guard';
@@ -45,7 +46,7 @@ describe('FND-07 Scope + Capability guard — server-side enforcement', () => {
         JwtModule.register({ secret: 'test-jwt-secret-min-32-karakter-untuk-automated-test-1234', signOptions: { expiresIn: '8h' } }),
       ],
       controllers: [TestScopeController],
-      providers: [PolicyService, JwtAuthGuard, ScopeGuard, CapabilityGuard],
+      providers: [PolicyService, TokenRevocationService, JwtAuthGuard, ScopeGuard, CapabilityGuard],
     }).compile();
 
     app = moduleRef.createNestApplication();

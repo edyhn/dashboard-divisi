@@ -4,7 +4,7 @@ const ROLE_CAPABILITIES: Record<string, string[]> = {
   BOD: ['*'],
   MANAGER: ['view:division', 'manage:division', 'view:report', 'write:target', 'write:assessment'],
   ADMIN: ['view:division', 'write:revenue', 'write:target', 'view:report'],
-  SUPERADMIN: ['*'],
+  SUPERADMIN: ['*', 'manage:config'],
   HRD: ['view:workforce', 'manage:workforce'],
   USER: ['view:own'],
 };

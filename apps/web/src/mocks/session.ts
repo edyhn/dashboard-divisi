@@ -32,6 +32,7 @@ export const MENU_ITEMS: MenuItem[] = [
   { path: '/karyawan', label: 'Data Karyawan', roles: ['HRD', 'MANAGER', 'SUPERADMIN'], capability: 'view:workforce' },
   { path: '/workforce', label: 'Kehadiran & Cuti', roles: ['MANAGER', 'HRD', 'USER', 'ADMIN'], capability: 'view:workforce' },
   { path: '/laporan', label: 'Laporan', roles: ['BOD', 'SUPERADMIN', 'HRD', 'MANAGER', 'ADMIN'], capability: 'view:report' },
+  { path: '/konfigurasi', label: 'Konfigurasi', roles: ['SUPERADMIN'], capability: 'manage:config' },
   { path: '/demo', label: 'Demo States', roles: ROLES },
 ];
 

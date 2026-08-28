@@ -6,6 +6,7 @@ import { AppLayout } from './layout/AppLayout';
 import DashboardPage from './pages/DashboardPage';
 import DemoStatesPage from './pages/DemoStatesPage';
 import KaryawanPage from './pages/KaryawanPage';
+import KonfigurasiPage from './pages/KonfigurasiPage';
 import LaporanPage from './pages/LaporanPage';
 import OmzetPage from './pages/OmzetPage';
 import PenilaianPage from './pages/PenilaianPage';
@@ -81,6 +82,14 @@ export default function App() {
                 element={
                   <RouteGuard capability="view:report">
                     <LaporanPage />
+                  </RouteGuard>
+                }
+              />
+              <Route
+                path="/konfigurasi"
+                element={
+                  <RouteGuard capability="manage:config">
+                    <KonfigurasiPage />
                   </RouteGuard>
                 }
               />

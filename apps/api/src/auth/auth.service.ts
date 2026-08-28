@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import bcrypt from 'bcrypt';
@@ -31,12 +32,28 @@ const MOCK_USERS = [
 ];
 
 @Injectable()
+export class TokenRevocationService {
+  private readonly revokedTokenIds = new Set<string>();
+
+  revoke(tokenId: string | undefined): void {
+    if (tokenId) {
+      this.revokedTokenIds.add(tokenId);
+    }
+  }
+
+  isRevoked(tokenId: string | undefined): boolean {
+    return tokenId ? this.revokedTokenIds.has(tokenId) : false;
+  }
+}
+
+@Injectable()
 export class AuthService {
   constructor(
     @Inject(PrismaService) private readonly prisma: PrismaService,
     @Inject(JwtService) private readonly jwtService: JwtService,
     @Inject(ConfigService) private readonly configService: ConfigService,
     @Inject(AuditService) private readonly audit: AuditService,
+    @Inject(TokenRevocationService) private readonly tokenRevocation: TokenRevocationService,
   ) {}
 
   private async findUserByEmail(email: string) {
@@ -79,6 +96,7 @@ export class AuthService {
       email: user.email,
       role: user.role,
       divisionCode: user.divisionCode,
+      jti: randomUUID(),
     };
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: this.configService.get<string>('JWT_SECRET'),
@@ -104,6 +122,20 @@ export class AuthService {
         divisionCode: user.divisionCode,
       },
     };
+  }
+
+  async logout(payload: JwtPayload) {
+    this.tokenRevocation.revoke(payload.jti);
+    await this.audit.log({
+      actorId: payload.sub,
+      actorEmail: payload.email,
+      actorRole: payload.role,
+      action: 'auth.logout',
+      entity: 'User',
+      entityId: payload.sub,
+      divisionCode: payload.divisionCode,
+    });
+    return { message: 'Logout berhasil' };
   }
 
   async getMe(payload: JwtPayload) {

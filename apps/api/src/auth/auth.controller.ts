@@ -30,9 +30,9 @@ export class AuthController {
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   @HttpCode(200)
-  async logout(@Res({ passthrough: true }) res: any) {
+  async logout(@CurrentUser() user: any, @Res({ passthrough: true }) res: any) {
     res.clearCookie('access_token', { path: '/' });
-    return { message: 'Logout berhasil' };
+    return this.authService.logout(user);
   }
 
   @Get('me')

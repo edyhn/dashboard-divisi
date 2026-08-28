@@ -3,12 +3,14 @@ import { CanActivate, ExecutionContext, Inject, Injectable, UnauthorizedExceptio
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import type { Request } from 'express';
+import { TokenRevocationService } from './auth.service';
 
 export interface JwtPayload {
   sub: string;
   email: string;
   role: string;
   divisionCode: string | null;
+  jti?: string;
   iat?: number;
   exp?: number;
 }
@@ -18,6 +20,7 @@ export class JwtAuthGuard implements CanActivate {
   constructor(
     @Inject(JwtService) private readonly jwtService: JwtService,
     @Inject(ConfigService) private readonly configService: ConfigService,
+    @Inject(TokenRevocationService) private readonly tokenRevocation: TokenRevocationService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -30,6 +33,9 @@ export class JwtAuthGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
         secret: this.configService.get<string>('JWT_SECRET'),
       });
+      if (this.tokenRevocation.isRevoked(payload.jti)) {
+        throw new UnauthorizedException({ code: 'UNAUTHORIZED', message: 'Sesi sudah logout' });
+      }
       (request as any).user = payload;
       return true;
     } catch {

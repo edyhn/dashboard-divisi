@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
-const DEFAULT_PASSWORD = 'Password123!';
+const DEFAULT_PASSWORD = process.env.SEED_DEFAULT_PASSWORD ?? 'Password123!';
 const BCRYPT_ROUNDS = 10;
 
 // 7 divisi final MVP — Finance ≠ Money Changer (decision 2026-08-27)
@@ -27,31 +26,31 @@ const OUTLETS = DIVISIONS.map((d) => ({
 // 17 akun MVP — 3 BOD lintas + 7 Manager + 7 Admin strict 1:1
 const USERS = [
   // BOD 3 lintas 7 divisi (divisionCode null = all)
-  { email: 'bod1@dashboard.test', name: 'BOD 1', role: 'BOD' as const, divisionCode: null },
-  { email: 'bod2@dashboard.test', name: 'BOD 2', role: 'BOD' as const, divisionCode: null },
-  { email: 'bod3@dashboard.test', name: 'BOD 3', role: 'BOD' as const, divisionCode: null },
+  { email: 'bod1@dashboard.test', name: 'BOD 1', role: Role.BOD, divisionCode: null },
+  { email: 'bod2@dashboard.test', name: 'BOD 2', role: Role.BOD, divisionCode: null },
+  { email: 'bod3@dashboard.test', name: 'BOD 3', role: Role.BOD, divisionCode: null },
   // Manager 7 per divisi
-  { email: 'manager.wrap@dashboard.test', name: 'Manager Wrapping', role: 'MANAGER' as const, divisionCode: 'WRAP' },
-  { email: 'manager.cell@dashboard.test', name: 'Manager Cellular', role: 'MANAGER' as const, divisionCode: 'CELL' },
-  { email: 'manager.refl@dashboard.test', name: 'Manager Refleksi', role: 'MANAGER' as const, divisionCode: 'REFL' },
-  { email: 'manager.mini@dashboard.test', name: 'Manager Minimarket', role: 'MANAGER' as const, divisionCode: 'MINI' },
-  { email: 'manager.fnb@dashboard.test', name: 'Manager FnB', role: 'MANAGER' as const, divisionCode: 'FNB' },
-  { email: 'manager.fin@dashboard.test', name: 'Manager Finance', role: 'MANAGER' as const, divisionCode: 'FIN' },
-  { email: 'manager.mc@dashboard.test', name: 'Manager Money Changer', role: 'MANAGER' as const, divisionCode: 'MC' },
+  { email: 'manager.wrap@dashboard.test', name: 'Manager Wrapping', role: Role.MANAGER, divisionCode: 'WRAP' },
+  { email: 'manager.cell@dashboard.test', name: 'Manager Cellular', role: Role.MANAGER, divisionCode: 'CELL' },
+  { email: 'manager.refl@dashboard.test', name: 'Manager Refleksi', role: Role.MANAGER, divisionCode: 'REFL' },
+  { email: 'manager.mini@dashboard.test', name: 'Manager Minimarket', role: Role.MANAGER, divisionCode: 'MINI' },
+  { email: 'manager.fnb@dashboard.test', name: 'Manager FnB', role: Role.MANAGER, divisionCode: 'FNB' },
+  { email: 'manager.fin@dashboard.test', name: 'Manager Finance', role: Role.MANAGER, divisionCode: 'FIN' },
+  { email: 'manager.mc@dashboard.test', name: 'Manager Money Changer', role: Role.MANAGER, divisionCode: 'MC' },
   // Admin 7 per divisi strict 1:1
-  { email: 'admin.wrap@dashboard.test', name: 'Admin Wrapping', role: 'ADMIN' as const, divisionCode: 'WRAP' },
-  { email: 'admin.cell@dashboard.test', name: 'Admin Cellular', role: 'ADMIN' as const, divisionCode: 'CELL' },
-  { email: 'admin.refl@dashboard.test', name: 'Admin Refleksi', role: 'ADMIN' as const, divisionCode: 'REFL' },
-  { email: 'admin.mini@dashboard.test', name: 'Admin Minimarket', role: 'ADMIN' as const, divisionCode: 'MINI' },
-  { email: 'admin.fnb@dashboard.test', name: 'Admin FnB', role: 'ADMIN' as const, divisionCode: 'FNB' },
-  { email: 'admin.fin@dashboard.test', name: 'Admin Finance', role: 'ADMIN' as const, divisionCode: 'FIN' },
-  { email: 'admin.mc@dashboard.test', name: 'Admin Money Changer', role: 'ADMIN' as const, divisionCode: 'MC' },
+  { email: 'admin.wrap@dashboard.test', name: 'Admin Wrapping', role: Role.ADMIN, divisionCode: 'WRAP' },
+  { email: 'admin.cell@dashboard.test', name: 'Admin Cellular', role: Role.ADMIN, divisionCode: 'CELL' },
+  { email: 'admin.refl@dashboard.test', name: 'Admin Refleksi', role: Role.ADMIN, divisionCode: 'REFL' },
+  { email: 'admin.mini@dashboard.test', name: 'Admin Minimarket', role: Role.ADMIN, divisionCode: 'MINI' },
+  { email: 'admin.fnb@dashboard.test', name: 'Admin FnB', role: Role.ADMIN, divisionCode: 'FNB' },
+  { email: 'admin.fin@dashboard.test', name: 'Admin Finance', role: Role.ADMIN, divisionCode: 'FIN' },
+  { email: 'admin.mc@dashboard.test', name: 'Admin Money Changer', role: Role.ADMIN, divisionCode: 'MC' },
 ] as const;
 
 async function main() {
   console.log('Seed start — 7 divisi + 7 outlet anonim + 17 users (idempotent)');
   const passwordHash = await bcrypt.hash(DEFAULT_PASSWORD, BCRYPT_ROUNDS);
-  console.log(`  password hash generated for ${DEFAULT_PASSWORD}`);
+  console.log('  password hash generated');
 
   for (const d of DIVISIONS) {
     await prisma.division.upsert({
@@ -77,12 +76,12 @@ async function main() {
   for (const u of USERS) {
     await prisma.user.upsert({
       where: { email: u.email },
-      update: { name: u.name, isActive: true, role: u.role as any, divisionCode: u.divisionCode },
+      update: { name: u.name, isActive: true, role: u.role, divisionCode: u.divisionCode },
       create: {
         email: u.email,
         name: u.name,
         passwordHash,
-        role: u.role as any,
+        role: u.role,
         divisionCode: u.divisionCode,
         isActive: true,
       },
@@ -120,8 +119,8 @@ async function main() {
     const cfg = DIVISION_CONFIGS[d.code as keyof typeof DIVISION_CONFIGS];
     await prisma.divisionConfig.upsert({
       where: { divisionId: division.id },
-      update: { enabledModules: cfg.modules as any, enabledKpis: cfg.kpis as any, isActive: true },
-      create: { divisionId: division.id, enabledModules: cfg.modules as any, enabledKpis: cfg.kpis as any, isActive: true },
+      update: { enabledModules: [...cfg.modules], enabledKpis: [...cfg.kpis], isActive: true },
+      create: { divisionId: division.id, enabledModules: [...cfg.modules], enabledKpis: [...cfg.kpis], isActive: true },
     });
     console.log(`  upsert DivisionConfig ${d.code} modules=${cfg.modules.join(',')}`);
   }
@@ -136,7 +135,6 @@ async function main() {
   if (divCount !== 7 || outletCount !== 7 || userCount !== 17 || scopeCount !== 14 || configCount !== 7) {
     throw new Error(`Seed validation failed: expected 7/7/17/14/7, got ${divCount}/${outletCount}/${userCount}/${scopeCount}/${configCount}`);
   }
-  console.log(`Default password for all seeded users: ${DEFAULT_PASSWORD}`);
 }
 
 main()

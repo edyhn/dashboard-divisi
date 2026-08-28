@@ -88,6 +88,7 @@ export function NoAccessState({
   return (
     <div
       role="alert"
+      data-testid="no-access"
       className="flex flex-col items-center gap-2 rounded-card border border-warning/30 bg-white p-10 text-center"
     >
       <p className="text-sm font-medium text-warning">{title}</p>
