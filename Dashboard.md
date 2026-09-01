@@ -48,6 +48,7 @@ Titik masuk utama untuk histori & progres semua pekerjaan yang dicatat via Obsid
 - **2026-09-01** — **Hybrid RoleSwitcher + period wiring**: `RoleSwitcher:6` dev-only + pill Demo preview + `handleRoleChange` sync `SessionContext` + `authApi.login` seed + `refresh`, `divisions.ts:30` `@deprecated getMockOutlets`, `useBodOverview:7` sudah `?from&to` via `OrgFilters`. Gate `lint 0/typecheck 0/build 9.80s` `29/29` `74/74` hijau; commit `cf14054`.
 - **2026-09-01** — **Kluster A polish**: `KonfigurasiPage:12` `outletQ` `GET /org/outlets` scoped tabel 20 baris, `KaryawanPage:40` `UNMAPPED` `EmptyState` + guard `HR-01`, `Decisions/2026-09-01-polish-orgfilters-workforce-omzet-roleSwitcher.md`. Gate `lint 0/typecheck 0/build 5.17s` `29/29` `74/74` hijau; commit `a83bfdd`.
 - **2026-09-01** — **Target BOD queue**: `hooks/useTargets:14` `useApproveTarget|useReturnTarget` `POST /targets/{id}/approve|return`, `TargetPage:96` queue draft tabel `Approve/Return` BOD only (SoD `approve:target`), toast `traceId`. Gate `lint 0/typecheck 0/build 4.33s` `29/29` `74/74` hijau; commit `33a802b`.
+- **2026-09-01** — **ProfilPage real BE**: `ProfilPage:18` `GET /auth/me` + `GET /org/me/context` scope pill, card `name/email/id/division` + ctx counts, `securityItems` Mock→Ready. Gate `lint 0/typecheck 0/build 7.05s` `29/29` `74/74` hijau; commit `fd1ea15`.
 
 ## Keputusan Penting
 
