@@ -14,3 +14,11 @@ export function useUpsertTarget() {
   const qc = useQueryClient();
   return useMutation({ mutationFn: (payload: Record<string, unknown>) => targetsApi.upsert(payload).then((r) => r.data), onSuccess: () => void qc.invalidateQueries({ queryKey: ['targets'] }) });
 }
+export function useApproveTarget() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (id: string) => targetsApi.approve(id).then((r) => r.data), onSuccess: () => void qc.invalidateQueries({ queryKey: ['targets'] }) });
+}
+export function useReturnTarget() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: ({ id, note }: { id: string; note: string }) => targetsApi.returnTarget(id, note).then((r) => r.data), onSuccess: () => void qc.invalidateQueries({ queryKey: ['targets'] }) });
+}

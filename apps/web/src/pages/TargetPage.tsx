@@ -4,15 +4,20 @@ import { EmptyState, ErrorState, LoadingState } from '../components/states';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { useToast } from '../components/ui/Toast';
-import { useTargetsCurrent, useTargetsRunRate, useUpsertTarget } from '../hooks/useTargets';
+import { useTargetsCurrent, useTargetsRunRate, useUpsertTarget, useApproveTarget, useReturnTarget } from '../hooks/useTargets';
 import { useOrgFilters } from '../components/filters/OrgFilters';
+import { useAuth } from '../session/AuthContext';
 
 export default function TargetPage() {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const isBod = user?.role === 'BOD';
   const { divisionCode } = useOrgFilters();
   const { data, isLoading, error, refetch } = useTargetsCurrent(divisionCode ? { divisionCode } : undefined);
   const runRate = useTargetsRunRate(divisionCode ? { divisionCode } : undefined);
   const upsert = useUpsertTarget();
+  const approve = useApproveTarget();
+  const ret = useReturnTarget();
   const [amount, setAmount] = useState('100');
   const [periodMonth, setPeriodMonth] = useState(new Date().toISOString().slice(0, 7));
   const [outletId, setOutletId] = useState('');
@@ -95,7 +100,20 @@ export default function TargetPage() {
       </section>
       <section className="rounded-card-lg border border-line bg-white p-5 shadow-card hover:shadow-card-hover transition-shadow">
         <h2 className="text-lg font-semibold text-navy">BOD review detail</h2>
-        <p className="text-sm text-slate-500">Approve/return detail — real via /targets/{'{id}'}/approve.</p>
+        <p className="text-sm text-slate-500">Queue draft → approve/return via `POST /targets/{'{id}'}/approve` &amp; `/return` (SOP SoD: hanya BOD).</p>
+        {isBod ? (
+          list.filter((r)=> r.status==='draft').length===0 ? <p className="mt-3 text-sm text-slate-500">Tidak ada draft pending untuk direview.</p> : (
+            <div className="mt-4 overflow-x-auto rounded-card-lg border border-line/60">
+              <table className="min-w-[640px] w-full text-left text-sm">
+                <caption className="sr-only">BOD review queue</caption>
+                <thead className="bg-surface text-slate-500"><tr><th scope="col" className="px-4 py-3">ID</th><th scope="col" className="px-4 py-3">Periode</th><th scope="col" className="px-4 py-3">Amount</th><th scope="col" className="px-4 py-3">Aksi</th></tr></thead>
+                <tbody className="divide-y divide-line/60">{list.filter((r)=> r.status==='draft').map((r)=> (
+                  <tr key={r.id}><td className="px-4 py-3 font-mono text-xs">{r.id.slice(0,8)}</td><td className="px-4 py-3">{r.period_month}</td><td className="px-4 py-3 font-mono text-xs">Rp {r.amount}</td><td className="px-4 py-3 flex gap-2"><Button onClick={async()=>{ try{ await approve.mutateAsync(r.id); toast('Approved','success'); void refetch(); }catch(e){ const err=e as unknown as {message?:string;traceId?:string}; toast(`${err.message ?? 'Gagal approve'}${err.traceId ? ` — ${err.traceId}`:''}`,'error'); } }} disabled={approve.isPending || ret.isPending}>Approve</Button><Button variant="secondary" onClick={async()=>{ try{ await ret.mutateAsync({id:r.id, note:'Need revision'}); toast('Returned','success'); void refetch(); }catch(e){ const err=e as unknown as {message?:string;traceId?:string}; toast(`${err.message ?? 'Gagal return'}${err.traceId ? ` — ${err.traceId}`:''}`,'error'); } }} disabled={approve.isPending || ret.isPending}>Return</Button></td></tr>
+                ))}</tbody>
+              </table>
+            </div>
+          )
+        ) : <p className="mt-3 text-sm text-slate-500">Hanya BOD dapat approve/return — SoD enforced (BE `capability:approve:target`).</p>}
       </section>
       <section className="rounded-card-lg border border-line bg-white p-5 shadow-card hover:shadow-card-hover transition-shadow">
         <h2 className="text-lg font-semibold text-navy">Governance target</h2>
