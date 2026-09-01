@@ -39,7 +39,9 @@ export default function KaryawanPage() {
       </section>
       <section className="rounded-card-lg border border-line bg-white p-5 shadow-card hover:shadow-card-hover transition-shadow">
         <h2 className="text-lg font-semibold text-navy">Resolusi UNMAPPED</h2>
-        <p className="text-sm text-slate-500">Real BE — mapping SobatHR, tampilkan saat ada unmapped.</p>
+        <p className="text-sm text-slate-500">SobatHR mapping HRD↔karyawan import — tampil saat ada unmapped (HR-04/05 blocker HR-01 sample). Privacy guard: tanpa NIK lengkap.</p>
+        <EmptyState title="Tidak ada UNMAPPED" description="Semua employee sudah ter-mapping. Jika ada impor baru dengan NIK tak dikenal, entri UNMAPPED akan muncul di sini untuk resolusi." action={<a href="/workforce" className="mt-3 inline-flex rounded-input border border-line bg-white px-4 py-2 text-sm font-medium text-navy hover:bg-surface">Lihat Workforce → Import SobatHR</a>} />
+        <p className="mt-3 text-xs text-slate-400">Guard HR-05: mapping manual + audit log (SOP audit). Blocked sampai HR-01 contoh export tersedia.</p>
       </section>
     </div>
   );
