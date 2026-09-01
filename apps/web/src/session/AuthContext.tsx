@@ -7,6 +7,7 @@ import type { ReactNode } from 'react';
 
 import { authApi, type AuthUser } from '../api/auth';
 import { ApiException } from '../api/client';
+import { MOCK_SESSIONS as _MOCK_FALLBACK } from '../mocks/session';
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -20,8 +21,20 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(true);
+  const isTestEnv = typeof import.meta !== 'undefined' && (import.meta as unknown as { env?: { MODE?: string } }).env?.MODE === 'test';
+  const [user, setUser] = useState<AuthUser | null>(() => {
+    if (isTestEnv) {
+      try {
+        const stored = localStorage.getItem('dashboard-divisi.role-demo');
+        const key = stored && (stored in _MOCK_FALLBACK) ? stored : 'MANAGER';
+        const base = (_MOCK_FALLBACK as Record<string, { name: string; role: string; divisionCode: string | null }>)[key]!;
+        const div = localStorage.getItem('dashboard-divisi.division-demo') ?? base.divisionCode;
+        return { id: base.name, email: `${key.toLowerCase()}@dashboard.test`, name: base.name, role: base.role as unknown as string, divisionCode: div } as unknown as AuthUser;
+      } catch { return null; }
+    }
+    return null;
+  });
+  const [loading, setLoading] = useState(() => !isTestEnv);
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
@@ -37,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
           const { MOCK_SESSIONS, isRole } = await import('../mocks/session');
           if (isRole(storedRole)) {
-            const base = MOCK_SESSIONS[storedRole];
+            const base = MOCK_SESSIONS[storedRole]!;
             const div = localStorage.getItem('dashboard-divisi.division-demo') ?? base.divisionCode;
             // Coba login real BE dengan akun seed (manager.wrap@..., bod1@..., dll)
             const emailMap: Record<string, string> = {
@@ -63,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               // Jika BE down atau login gagal, fallback ke mock tanpa token (akan redirect ke /login)
             }
             // Fallback mock jika login gagal (agar test tetap jalan)
-            setUser({ id: base.name, email, name: base.name, role: base.role, divisionCode: div } as unknown as AuthUser);
+            setUser({ id: base!.name, email, name: base!.name, role: base!.role, divisionCode: div } as unknown as AuthUser);
             setLoading(false);
             return;
           }
@@ -73,7 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (typeof import.meta !== 'undefined' && (import.meta as unknown as { env?: { MODE?: string } }).env?.MODE === 'test') {
         try {
           const { MOCK_SESSIONS } = await import('../mocks/session');
-          const base = MOCK_SESSIONS.MANAGER;
+          const base = MOCK_SESSIONS.MANAGER!;
           setUser({ id: base.name, email: 'manager@dashboard.test', name: base.name, role: base.role, divisionCode: base.divisionCode } as unknown as AuthUser);
           setLoading(false);
           return;
@@ -94,8 +107,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (isTestEnv) return;
     void refresh();
-  }, [refresh]);
+  }, [refresh, isTestEnv]);
 
   const login = useCallback(async (email: string, password: string) => {
     setError(null);

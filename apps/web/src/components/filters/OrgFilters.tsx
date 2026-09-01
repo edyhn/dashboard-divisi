@@ -34,36 +34,36 @@ export function OrgFilters() {
   const { periodFrom, periodTo, divisionCode, outletCode, setFilter, clearAll } = useOrgFilters();
 
   return (
-    <div className="flex flex-wrap gap-3 p-3 border rounded bg-white">
-      <label className="flex flex-col text-sm">
-        Periode Dari
+    <div className="grid gap-3 p-4 rounded-card-lg border border-line/60 bg-white shadow-card lg:grid-cols-[1fr_1fr_1fr_1fr_auto] lg:items-end">
+      <label className="flex flex-col gap-1.5 text-xs font-medium text-slate-600">
+        <span className="uppercase tracking-wider text-slate-400">Periode Dari</span>
         <input
           type="date"
           value={periodFrom}
           onChange={(e) => setFilter('from', e.target.value)}
-          className="border rounded px-2 py-1"
+          className="rounded-input border border-line bg-white px-3 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
           data-testid="filter-from"
         />
       </label>
-      <label className="flex flex-col text-sm">
-        Periode Sampai
+      <label className="flex flex-col gap-1.5 text-xs font-medium text-slate-600">
+        <span className="uppercase tracking-wider text-slate-400">Periode Sampai</span>
         <input
           type="date"
           value={periodTo}
           onChange={(e) => setFilter('to', e.target.value)}
-          className="border rounded px-2 py-1"
+          className="rounded-input border border-line bg-white px-3 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
           data-testid="filter-to"
         />
       </label>
-      <label className="flex flex-col text-sm">
-        Divisi
+      <label className="flex flex-col gap-1.5 text-xs font-medium text-slate-600">
+        <span className="uppercase tracking-wider text-slate-400">Divisi</span>
         <select
           value={divisionCode}
           onChange={(e) => {
             setFilter('divisionCode', e.target.value);
             setFilter('outletCode', ''); // reset outlet when divisi change
           }}
-          className="border rounded px-2 py-1"
+          className="rounded-input border border-line bg-white px-3 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
           data-testid="filter-division"
         >
           <option value="">Semua (BOD)</option>
@@ -74,12 +74,12 @@ export function OrgFilters() {
           ))}
         </select>
       </label>
-      <label className="flex flex-col text-sm">
-        Outlet
+      <label className="flex flex-col gap-1.5 text-xs font-medium text-slate-600">
+        <span className="uppercase tracking-wider text-slate-400">Outlet</span>
         <select
           value={outletCode}
           onChange={(e) => setFilter('outletCode', e.target.value)}
-          className="border rounded px-2 py-1"
+          className="rounded-input border border-line bg-white px-3 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none disabled:opacity-50"
           data-testid="filter-outlet"
           disabled={!divisionCode}
         >
@@ -87,7 +87,7 @@ export function OrgFilters() {
           {divisionCode && getMockOutlets(divisionCode).map((code) => <option key={code} value={code}>{code}</option>)}
         </select>
       </label>
-      <button onClick={clearAll} className="self-end border rounded px-3 py-1 text-sm" data-testid="filter-clear">
+      <button onClick={clearAll} className="h-[38px] rounded-input border border-line bg-white px-4 py-2 text-sm font-medium text-navy hover:bg-surface transition-colors" data-testid="filter-clear">
         Clear
       </button>
     </div>

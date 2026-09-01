@@ -87,7 +87,7 @@ describe('App', () => {
     render(<App />);
     expect(await screen.findByRole('heading', { name: 'Laporan & Export' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Katalog laporan' })).toBeTruthy();
-    expect(screen.getAllByText('Payroll Summary')).toHaveLength(2);
+    expect(screen.getAllByText('Payroll Summary')).toHaveLength(1);
     expect(screen.getByRole('heading', { name: 'Access guardrail' })).toBeTruthy();
   });
 

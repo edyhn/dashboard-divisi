@@ -8,6 +8,7 @@ import { useTargetsCurrent, useTargetsRunRate, useUpsertTarget } from '../hooks/
 import { useOrgFilters } from '../components/filters/OrgFilters';
 
 export default function TargetPage() {
+  const { toast } = useToast();
   const { divisionCode } = useOrgFilters();
   const { data, isLoading, error, refetch } = useTargetsCurrent(divisionCode ? { divisionCode } : undefined);
   const runRate = useTargetsRunRate(divisionCode ? { divisionCode } : undefined);
@@ -23,8 +24,6 @@ export default function TargetPage() {
   }
 
   const list = Array.isArray(data) ? data as unknown as { id: string; outlet_id: string; amount: number; status: string; period_month: string }[] : [];
-
-  const { toast } = useToast();
   const handleSubmit = async () => {
     if (!outletId) return;
     try {
@@ -78,8 +77,21 @@ export default function TargetPage() {
 
       <section className="rounded-card-lg border border-line bg-white p-5 shadow-card hover:shadow-card-hover transition-shadow">
         <h2 className="text-lg font-semibold text-navy">Run-rate (sisa harian)</h2>
-        {runRate.isLoading ? <p className="text-sm text-slate-500">Memuat run-rate...</p> : runRate.error ? <p className="text-sm text-danger">{(runRate.error as Error).message}</p> : <pre className="mt-2 max-h-32 overflow-auto rounded bg-surface p-3 text-xs">{JSON.stringify(runRate.data, null, 2)}</pre>}
-        <p className="mt-2 text-xs text-slate-400">Scope {divisionCode ?? 'semua'} · Superadmin 1:1, Executive lintas</p>
+        {(() => {
+          if (runRate.isLoading) return <p className="text-sm text-slate-500">Memuat run-rate...</p>;
+          if (runRate.error) return <p className="text-sm text-danger">{(runRate.error as Error).message}</p>;
+          const r = runRate.data as unknown as { targetAmount?: string; achievedAmount?: string; remainingAmount?: string; daysRemaining?: number; dailyRequired?: string } | null;
+          if (!r) return <p className="text-sm text-slate-500">Belum ada target periode ini.</p>;
+          return (
+            <div className="mt-3 grid gap-3 md:grid-cols-4">
+              <div className="rounded-card-lg border border-line/60 p-4 bg-surface/30"><p className="text-xs uppercase tracking-wider text-slate-400">Target</p><p className="mt-1 font-semibold text-navy">Rp {r.targetAmount ?? '0'}</p></div>
+              <div className="rounded-card-lg border border-line/60 p-4"><p className="text-xs uppercase tracking-wider text-slate-400">Tercapai</p><p className="mt-1 font-semibold text-success">Rp {r.achievedAmount ?? '0'}</p></div>
+              <div className="rounded-card-lg border border-line/60 p-4"><p className="text-xs uppercase tracking-wider text-slate-400">Sisa</p><p className="mt-1 font-semibold text-danger">Rp {r.remainingAmount ?? '0'}</p></div>
+              <div className="rounded-card-lg border border-line/60 p-4 bg-primary-light/30"><p className="text-xs uppercase tracking-wider text-primary">Per hari</p><p className="mt-1 font-semibold text-primary">Rp {r.dailyRequired ?? '0'}</p><p className="text-xs text-slate-500">{r.daysRemaining ?? 0} hari tersisa</p></div>
+            </div>
+          );
+        })()}
+        <p className="mt-3 text-xs text-slate-400">Scope {divisionCode ?? 'semua'} · Superadmin 1:1, Executive lintas</p>
       </section>
       <section className="rounded-card-lg border border-line bg-white p-5 shadow-card hover:shadow-card-hover transition-shadow">
         <h2 className="text-lg font-semibold text-navy">BOD review detail</h2>

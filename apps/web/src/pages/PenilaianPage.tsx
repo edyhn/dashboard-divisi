@@ -17,8 +17,12 @@ export default function PenilaianPage() {
       <section className="grid gap-4 md:grid-cols-2">
         {list.map(d=> (
           <article key={d.divisionCode} className="rounded-card-lg border border-line bg-white p-5 shadow-card hover:shadow-card-hover transition-shadow">
-            <h2 className="font-semibold text-navy">{d.divisionCode} — {d.divisionName}</h2>
-            <p className="mt-1 text-sm text-slate-500">{d.metrics.map(m=>m.kpiCode).join(', ')}</p>
+            <div className="flex items-start justify-between gap-3">
+              <div><h2 className="font-semibold text-navy">{d.divisionCode} — {d.divisionName}</h2><p className="mt-1 text-sm text-slate-500">{d.metrics.map(m=>m.kpiCode).join(', ')}</p></div>
+              <span className="rounded-pill bg-success-light px-2 py-1 text-xs font-medium text-success border border-success/20">{d.metrics.length} KPI</span>
+            </div>
+            <div className="mt-3 h-2 rounded-full bg-surface overflow-hidden"><div className="h-full bg-gradient-to-r from-primary to-primary-dark" style={{ width: `${Math.min(100, d.metrics.length * 18)}%` }} /></div>
+            <p className="mt-2 text-xs text-slate-400">Compatibility config-driven</p>
           </article>
         ))}
       </section>
