@@ -1,6 +1,7 @@
 import { StatusPill } from '../components/StatusPill';
 import { roleDisplay } from '../mocks/session';
 import { useAuth } from '../session/AuthContext';
+import { useOrgContext } from '../hooks/useBod';
 
 const selfService = [
   { label: 'Jadwal hari ini', value: 'Shift pagi · 08:00-16:00', visibility: 'Hanya data sendiri' },
@@ -10,25 +11,27 @@ const selfService = [
 ];
 
 const securityItems = [
-  { title: 'Password', detail: 'Reset password akan tersedia setelah integrasi auth UI.', status: 'Planned' },
-  { title: 'Session', detail: 'Logout server-side sudah memblokir token lama pada baseline FND-06.', status: 'Ready' },
-  { title: 'Scope', detail: 'Role demo menentukan menu dan akses halaman yang tampil.', status: 'Mock' },
+  { title: 'Password', detail: 'Reset via POST /auth/reset (BE real) — terverifikasi di AuthTest.', status: 'Ready' },
+  { title: 'Session', detail: 'Logout server-side mem-blokir JWT via TokenRevocationService (httpOnly cookie).', status: 'Ready' },
+  { title: 'Scope', detail: 'Menu & halaman guarded Capability + DivisionScope server-side (BOD lintas, MANAGER 1:1).', status: 'Ready' },
 ];
 
 export default function ProfilPage() {
   const { user } = useAuth();
+  const ctx = useOrgContext();
   if (!user) return <div className="p-6 text-sm">Belum login — <a href="/login" className="text-primary underline">Masuk</a></div>;
+  const scope = (ctx.data as unknown as { scope?: string } | undefined)?.scope ?? user.divisionCode ?? '—';
 
   return (
     <div className="space-y-6">
       <section className="rounded-card-lg border border-line bg-white p-5 shadow-card hover:shadow-card-hover transition-shadow">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div>
-            <p className="text-sm font-medium text-primary">Akun</p>
+            <p className="text-sm font-medium text-primary">Akun — Real BE</p>
             <h1 className="mt-1 text-2xl lg:text-3xl font-semibold text-navy">Profil Saya</h1>
-            <p className="mt-2 max-w-2xl text-sm text-slate-500">Self-view mock untuk session demo, scope role, keamanan akun, dan ringkasan pribadi tanpa membuka data sensitif.</p>
+            <p className="mt-2 max-w-2xl text-sm text-slate-500">Self-view real via `GET /auth/me` + `GET /org/me/context` — scope `{scope}`, trace_id envelope. Tanpa membuka payroll nominal rekan.</p>
           </div>
-          <button type="button" className="rounded-input border border-line px-4 py-2 text-sm font-medium text-navy">Edit preferensi</button>
+          <span className="rounded-pill bg-success-light border border-success/20 px-3 py-1 text-xs font-medium text-success">Scope: {scope}</span>
         </div>
       </section>
 
@@ -38,10 +41,10 @@ export default function ProfilPage() {
             {user.name.slice(0, 1)}
           </div>
           <h2 className="mt-4 text-lg font-semibold text-navy">{user.name}</h2>
-          <p className="mt-1 text-sm text-slate-500">{roleDisplay(user.role)}</p>
-          <p className="mt-1 text-sm text-slate-500">{user.divisionCode ?? 'Semua divisi'}</p>
+          <p className="mt-1 text-sm text-slate-500">{roleDisplay(user.role)} · {user.email}</p>
+          <p className="mt-1 text-sm font-mono text-xs text-slate-500">{user.divisionCode ?? 'Semua divisi'} · ID {user.id.slice(0,8)}</p>
           <div className="mt-4 rounded-card-lg bg-surface p-4 text-sm text-slate-600">
-            Session demo tersimpan lokal dan dapat diganti dari RoleSwitcher.
+            {ctx.isLoading ? 'Memuat konteks...' : ctx.data ? `Scope real: ${scope} · Divisi ${(ctx.data as unknown as { divisions:{code:string}[] }).divisions.length} · Outlet ${(ctx.data as unknown as { outlets:{code:string}[] }).outlets.length}` : 'Konteks via /org/me/context'}
           </div>
         </article>
 
