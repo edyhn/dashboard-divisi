@@ -137,8 +137,8 @@ export default function DashboardPage() {
           </div>
           <button type="button" className="rounded-input border border-line px-3 py-2 text-sm font-medium text-navy">Lihat detail</button>
         </div>
-        <div className="mt-4 overflow-hidden rounded-card border border-line">
-          <table className="w-full text-left text-sm">
+        <div className="mt-4 overflow-x-auto rounded-card border border-line">
+          <table className="min-w-[720px] w-full text-left text-sm">
             <thead className="bg-surface text-slate-500">
               <tr>
                 <th className="px-4 py-3 font-medium">Outlet</th>

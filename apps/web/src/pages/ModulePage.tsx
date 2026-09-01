@@ -51,8 +51,8 @@ export function ModulePage({ eyebrow, title, description, primaryAction, stats, 
           </div>
           <span className="rounded-input bg-surface px-3 py-1 text-sm text-slate-500">Mock</span>
         </div>
-        <div className="mt-4 overflow-hidden rounded-card border border-line">
-          <table className="w-full text-left text-sm">
+        <div className="mt-4 overflow-x-auto rounded-card border border-line">
+          <table className="min-w-[640px] w-full text-left text-sm">
             <thead className="bg-surface text-slate-500">
               <tr>
                 {columns.map((column) => (

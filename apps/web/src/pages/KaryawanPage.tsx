@@ -58,8 +58,8 @@ export default function KaryawanPage() {
 
       <section className="rounded-card border border-line bg-white p-5 shadow-card">
         <h2 className="text-lg font-semibold text-navy">Daftar karyawan anonim</h2>
-        <div className="mt-4 overflow-hidden rounded-card border border-line">
-          <table className="w-full text-left text-sm">
+        <div className="mt-4 overflow-x-auto rounded-card border border-line">
+          <table className="min-w-[720px] w-full text-left text-sm">
             <thead className="bg-surface text-slate-500">
               <tr>
                 <th className="px-4 py-3 font-medium">Kode</th>

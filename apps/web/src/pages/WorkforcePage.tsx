@@ -63,8 +63,8 @@ export default function WorkforcePage() {
       <section className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
         <article className="rounded-card border border-line bg-white p-5 shadow-card">
           <h2 className="text-lg font-semibold text-navy">Ringkasan attendance scoped</h2>
-          <div className="mt-4 overflow-hidden rounded-card border border-line">
-            <table className="w-full text-left text-sm">
+          <div className="mt-4 overflow-x-auto rounded-card border border-line">
+            <table className="min-w-[760px] w-full text-left text-sm">
               <thead className="bg-surface text-slate-500">
                 <tr>
                   <th className="px-4 py-3 font-medium">Tanggal</th>
