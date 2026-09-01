@@ -1,14 +1,6 @@
 import { useSearchParams } from 'react-router-dom';
 
-const DIVISIONS = [
-  { code: 'WRAP', name: 'Wrapping' },
-  { code: 'CELL', name: 'Cellular' },
-  { code: 'REFL', name: 'Refleksi' },
-  { code: 'MINI', name: 'Minimarket' },
-  { code: 'FNB', name: 'FnB' },
-  { code: 'FIN', name: 'Finance' },
-  { code: 'MC', name: 'Money Changer' },
-] as const;
+import { DIVISIONS, getMockOutlets } from '../../config/divisions';
 
 export function useOrgFilters() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -92,7 +84,7 @@ export function OrgFilters() {
           disabled={!divisionCode}
         >
           <option value="">Semua</option>
-          {divisionCode && <option value={`${divisionCode}-001`}>{divisionCode}-001</option>}
+          {divisionCode && getMockOutlets(divisionCode).map((code) => <option key={code} value={code}>{code}</option>)}
         </select>
       </label>
       <button onClick={clearAll} className="self-end border rounded px-3 py-1 text-sm" data-testid="filter-clear">

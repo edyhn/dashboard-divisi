@@ -1,8 +1,7 @@
+import { DIVISION_CODES } from '../config/divisions';
 import { ROLES } from '../mocks/session';
 import type { Role } from '../mocks/session';
 import { useSession } from '../session/SessionContext';
-
-const DIVISIONS = ['WRAP', 'CELL', 'REFL', 'MINI', 'FNB', 'FIN', 'MC'] as const;
 
 export function RoleSwitcher() {
   const { user, setRole, setDivisionCode } = useSession();
@@ -33,7 +32,7 @@ export function RoleSwitcher() {
             className="rounded-input border border-line bg-white px-2 py-1"
             data-testid="division-switcher"
           >
-            {DIVISIONS.map((code) => (
+            {DIVISION_CODES.map((code) => (
               <option key={code} value={code}>
                 {code}
               </option>

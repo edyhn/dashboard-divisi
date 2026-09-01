@@ -11,13 +11,22 @@ class JwtService
 {
     protected string $secret;
     protected string $algo = 'HS256';
+    public const DEFAULT_TTL_SECONDS = 28800; // 8 jam — SOP: no magic number
 
     public function __construct()
     {
-        $this->secret = (string) (env('JWT_SECRET') ?: config('app.key') ?: 'default-jwt-secret-for-testing-min-32-chars-12345');
+        $secret = (string) (env('JWT_SECRET') ?: config('app.key') ?: '');
+        if ($secret === '') {
+            if (app()->environment('testing')) {
+                $secret = 'test-jwt-secret-min-32-karakter-untuk-ci-1234567890';
+            } else {
+                throw new \RuntimeException('JWT_SECRET / APP_KEY belum dikonfigurasi — set di .env (SOP: Zero Hardcoded Secrets)');
+            }
+        }
+        $this->secret = $secret;
     }
 
-    public function sign(array $payload, int $ttlSeconds = 28800): string
+    public function sign(array $payload, int $ttlSeconds = self::DEFAULT_TTL_SECONDS): string
     {
         $now = time();
         $claims = array_merge([

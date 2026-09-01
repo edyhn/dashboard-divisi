@@ -8,5 +8,18 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/setupTests.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov', 'html'],
+      // SOP 3 DoD: >80% — threshold bertahap, mulai 50% untuk FE mock lalu naik ke 80% saat BE ready
+      thresholds: {
+        lines: 50,
+        branches: 50,
+        functions: 50,
+        statements: 50,
+      },
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['src/**/*.test.{ts,tsx}', 'src/mocks/**', 'src/setupTests.ts'],
+    },
   },
 });

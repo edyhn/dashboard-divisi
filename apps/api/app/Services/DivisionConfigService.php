@@ -11,61 +11,42 @@ class DivisionConfigService
 {
     public function getConfig(string $divisionCode): ?array
     {
-        try {
-            $division = Division::where('code', $divisionCode)->first();
-            if (!$division) {
-                return null;
-            }
+        $division = Division::where('code', $divisionCode)->first();
+        if (!$division) {
+            return null;
+        }
 
-            $config = DivisionConfig::where('division_id', $division->id)->first();
-            if (!$config) {
-                return [
-                    'divisionCode' => $divisionCode,
-                    'divisionName' => $division->name,
-                    'enabledModules' => [],
-                    'enabledKpis' => [],
-                    'isActive' => $division->is_active,
-                ];
-            }
-
+        $config = DivisionConfig::where('division_id', $division->id)->first();
+        if (!$config) {
             return [
                 'divisionCode' => $divisionCode,
                 'divisionName' => $division->name,
-                'enabledModules' => $config->enabled_modules ?? [],
-                'enabledKpis' => $config->enabled_kpis ?? [],
-                'isActive' => $config->is_active && $division->is_active,
+                'enabledModules' => [],
+                'enabledKpis' => [],
+                'isActive' => $division->is_active,
             ];
-        } catch (Throwable) {
-            return null;
         }
+
+        return [
+            'divisionCode' => $divisionCode,
+            'divisionName' => $division->name,
+            'enabledModules' => $config->enabled_modules ?? [],
+            'enabledKpis' => $config->enabled_kpis ?? [],
+            'isActive' => $config->is_active && $division->is_active,
+        ];
     }
 
     public function getAllConfigs(): array
     {
-        try {
-            $configs = DivisionConfig::with('division')->get();
-            if ($configs->isEmpty()) {
-                return [
-                    ['divisionCode' => 'WRAP', 'enabledModules' => ['dashboard', 'revenue'], 'enabledKpis' => ['revenue.gross']],
-                    ['divisionCode' => 'CELL', 'enabledModules' => ['dashboard', 'revenue'], 'enabledKpis' => ['revenue.gross']],
-                    ['divisionCode' => 'REFL', 'enabledModules' => ['dashboard', 'revenue'], 'enabledKpis' => ['revenue.gross']],
-                    ['divisionCode' => 'MINI', 'enabledModules' => ['dashboard', 'revenue'], 'enabledKpis' => ['revenue.gross']],
-                    ['divisionCode' => 'FNB', 'enabledModules' => ['dashboard', 'revenue'], 'enabledKpis' => ['revenue.gross']],
-                    ['divisionCode' => 'FIN', 'enabledModules' => ['dashboard', 'revenue'], 'enabledKpis' => ['revenue.gross']],
-                    ['divisionCode' => 'MC', 'enabledModules' => ['dashboard', 'forex'], 'enabledKpis' => ['forex.volume']],
-                ];
-            }
+        $configs = DivisionConfig::with('division')->get();
 
-            return $configs->map(fn ($c) => [
-                'divisionCode' => $c->division->code,
-                'divisionName' => $c->division->name,
-                'enabledModules' => $c->enabled_modules,
-                'enabledKpis' => $c->enabled_kpis,
-                'isActive' => $c->is_active && $c->division->is_active,
-            ])->toArray();
-        } catch (Throwable) {
-            return [];
-        }
+        return $configs->map(fn ($c) => [
+            'divisionCode' => $c->division->code,
+            'divisionName' => $c->division->name,
+            'enabledModules' => $c->enabled_modules,
+            'enabledKpis' => $c->enabled_kpis,
+            'isActive' => $c->is_active && $c->division->is_active,
+        ])->toArray();
     }
 
     public function upsertConfig(string $divisionCode, array $enabledModules, array $enabledKpis): array

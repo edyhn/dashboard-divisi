@@ -40,26 +40,25 @@ class AuthService
 
     protected function findUserByEmail(string $email): ?array
     {
-        try {
-            $user = User::where('email', $email)->first();
-            if ($user) {
-                return [
-                    'id' => $user->id,
-                    'email' => $user->email,
-                    'name' => $user->name,
-                    'role' => $user->role,
-                    'division_code' => $user->division_code,
-                    'password_hash' => $user->password_hash,
-                    'is_active' => $user->is_active,
-                ];
-            }
-        } catch (Throwable) {
-            // DB-less fallback
+        $user = User::where('email', $email)->first();
+        if ($user) {
+            return [
+                'id' => $user->id,
+                'email' => $user->email,
+                'name' => $user->name,
+                'role' => $user->role,
+                'division_code' => $user->division_code,
+                'password_hash' => $user->password_hash,
+                'is_active' => $user->is_active,
+            ];
         }
 
-        foreach (self::MOCK_USERS as $u) {
-            if ($u['email'] === $email) {
-                return array_merge($u, ['password_hash' => self::MOCK_PASSWORD_HASH]);
+        // SOP: mock hanya untuk testing (Seeder), bukan fallback produksi
+        if (app()->environment('testing')) {
+            foreach (self::MOCK_USERS as $u) {
+                if ($u['email'] === $email) {
+                    return array_merge($u, ['password_hash' => self::MOCK_PASSWORD_HASH]);
+                }
             }
         }
 
@@ -68,26 +67,24 @@ class AuthService
 
     protected function findUserById(string $id): ?array
     {
-        try {
-            $user = User::find($id);
-            if ($user) {
-                return [
-                    'id' => $user->id,
-                    'email' => $user->email,
-                    'name' => $user->name,
-                    'role' => $user->role,
-                    'division_code' => $user->division_code,
-                    'password_hash' => $user->password_hash,
-                    'is_active' => $user->is_active,
-                ];
-            }
-        } catch (Throwable) {
-            // DB-less fallback
+        $user = User::find($id);
+        if ($user) {
+            return [
+                'id' => $user->id,
+                'email' => $user->email,
+                'name' => $user->name,
+                'role' => $user->role,
+                'division_code' => $user->division_code,
+                'password_hash' => $user->password_hash,
+                'is_active' => $user->is_active,
+            ];
         }
 
-        foreach (self::MOCK_USERS as $u) {
-            if ($u['id'] === $id) {
-                return array_merge($u, ['password_hash' => self::MOCK_PASSWORD_HASH]);
+        if (app()->environment('testing')) {
+            foreach (self::MOCK_USERS as $u) {
+                if ($u['id'] === $id) {
+                    return array_merge($u, ['password_hash' => self::MOCK_PASSWORD_HASH]);
+                }
             }
         }
 
@@ -101,14 +98,7 @@ class AuthService
             throw new ApiException('AUTH_REQUIRED', 'Email atau password salah');
         }
 
-        // Support bcrypt via Hash::check or password_verify
         $ok = Hash::check($password, $user['password_hash']) || password_verify($password, $user['password_hash']);
-        if (!$ok) {
-            // Check default mock password for dev/test
-            if ($password === 'Password123!') {
-                $ok = true;
-            }
-        }
 
         if (!$ok) {
             throw new ApiException('AUTH_REQUIRED', 'Email atau password salah');
@@ -203,22 +193,15 @@ class AuthService
         }
 
         $ok = Hash::check($oldPassword, $user['password_hash']) || password_verify($oldPassword, $user['password_hash']);
-        if (!$ok && $oldPassword === 'Password123!') {
-            $ok = true;
-        }
 
         if (!$ok) {
             throw new ApiException('AUTH_REQUIRED', 'Password lama salah');
         }
 
-        try {
-            $dbUser = User::find($userId);
-            if ($dbUser) {
-                $dbUser->password_hash = Hash::make($newPassword, ['rounds' => 10]);
-                $dbUser->save();
-            }
-        } catch (Throwable) {
-            // DB-less fallback
+        $dbUser = User::find($userId);
+        if ($dbUser) {
+            $dbUser->password_hash = Hash::make($newPassword, ['rounds' => 10]);
+            $dbUser->save();
         }
 
         return ['message' => 'Password berhasil direset'];

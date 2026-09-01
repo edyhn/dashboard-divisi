@@ -11,30 +11,14 @@ class OrgReadModelService
 {
     public function getDivisionsForUser(array $user): array
     {
-        try {
-            $divisions = Division::where('is_active', true)->orderBy('sort_order', 'asc')->get();
-            $all = $divisions->map(fn ($d) => [
-                'id' => $d->id,
-                'code' => $d->code,
-                'name' => $d->name,
-                'isActive' => $d->is_active,
-                'sortOrder' => $d->sort_order,
-            ])->toArray();
-        } catch (Throwable) {
-            $all = [];
-        }
-
-        if (empty($all)) {
-            $all = [
-                ['id' => '1', 'code' => 'WRAP', 'name' => 'Wrapping', 'isActive' => true, 'sortOrder' => 1],
-                ['id' => '2', 'code' => 'CELL', 'name' => 'Cellular', 'isActive' => true, 'sortOrder' => 2],
-                ['id' => '3', 'code' => 'REFL', 'name' => 'Refleksi', 'isActive' => true, 'sortOrder' => 3],
-                ['id' => '4', 'code' => 'MINI', 'name' => 'Minimarket', 'isActive' => true, 'sortOrder' => 4],
-                ['id' => '5', 'code' => 'FNB', 'name' => 'FnB', 'isActive' => true, 'sortOrder' => 5],
-                ['id' => '6', 'code' => 'FIN', 'name' => 'Finance', 'isActive' => true, 'sortOrder' => 6],
-                ['id' => '7', 'code' => 'MC', 'name' => 'Money Changer', 'isActive' => true, 'sortOrder' => 7],
-            ];
-        }
+        $divisions = Division::where('is_active', true)->orderBy('sort_order', 'asc')->get();
+        $all = $divisions->map(fn ($d) => [
+            'id' => $d->id,
+            'code' => $d->code,
+            'name' => $d->name,
+            'isActive' => $d->is_active,
+            'sortOrder' => $d->sort_order,
+        ])->toArray();
 
         $role = $user['role'] ?? '';
         $userDivision = $user['divisionCode'] ?? $user['division_code'] ?? null;
@@ -56,54 +40,30 @@ class OrgReadModelService
             return [];
         }
 
-        try {
-            $query = Outlet::where('is_active', true);
-            if ($divisionCode) {
-                $div = Division::where('code', $divisionCode)->first();
-                if (!$div) {
-                    return [];
-                }
-                $query->where('division_id', $div->id);
-            } elseif ($role !== 'BOD' && $userDivision) {
-                $div = Division::where('code', $userDivision)->first();
-                if (!$div) {
-                    return [];
-                }
-                $query->where('division_id', $div->id);
+        $query = Outlet::where('is_active', true);
+        if ($divisionCode) {
+            $div = Division::where('code', $divisionCode)->first();
+            if (!$div) {
+                return [];
             }
-
-            $outlets = $query->orderBy('code', 'asc')->get();
-            if ($outlets->isNotEmpty()) {
-                return $outlets->map(fn ($o) => [
-                    'id' => $o->id,
-                    'code' => $o->code,
-                    'name' => $o->name,
-                    'divisionId' => $o->division_id,
-                    'isActive' => $o->is_active,
-                ])->toArray();
+            $query->where('division_id', $div->id);
+        } elseif ($role !== 'BOD' && $userDivision) {
+            $div = Division::where('code', $userDivision)->first();
+            if (!$div) {
+                return [];
             }
-        } catch (Throwable) {
-            // DB-less fallback
+            $query->where('division_id', $div->id);
         }
 
-        $all = [
-            ['code' => 'WRAP-001', 'name' => 'Wrapping Pusat', 'divisionCode' => 'WRAP'],
-            ['code' => 'CELL-001', 'name' => 'Cellular Pusat', 'divisionCode' => 'CELL'],
-            ['code' => 'REFL-001', 'name' => 'Refleksi Pusat', 'divisionCode' => 'REFL'],
-            ['code' => 'MINI-001', 'name' => 'Minimarket Pusat', 'divisionCode' => 'MINI'],
-            ['code' => 'FNB-001', 'name' => 'FnB Pusat', 'divisionCode' => 'FNB'],
-            ['code' => 'FIN-001', 'name' => 'Finance Pusat', 'divisionCode' => 'FIN'],
-            ['code' => 'MC-001', 'name' => 'Money Changer Pusat', 'divisionCode' => 'MC'],
-        ];
+        $outlets = $query->orderBy('code', 'asc')->get();
 
-        if ($role === 'BOD' && !$userDivision) {
-            if ($divisionCode) {
-                return array_values(array_filter($all, fn ($o) => $o['divisionCode'] === $divisionCode));
-            }
-            return $all;
-        }
-
-        return array_values(array_filter($all, fn ($o) => $o['divisionCode'] === $userDivision));
+        return $outlets->map(fn ($o) => [
+            'id' => $o->id,
+            'code' => $o->code,
+            'name' => $o->name,
+            'divisionId' => $o->division_id,
+            'isActive' => $o->is_active,
+        ])->toArray();
     }
 
     public function getAssignmentsForUser(array $user): array

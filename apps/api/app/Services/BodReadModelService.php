@@ -9,24 +9,8 @@ class BodReadModelService
 {
     public function getExecutiveReadModel(): array
     {
-        try {
-            $divisions = Division::orderBy('sort_order', 'asc')->get();
-            $divs = $divisions->map(fn ($d) => ['code' => $d->code, 'name' => $d->name])->toArray();
-        } catch (Throwable) {
-            $divs = [];
-        }
-
-        if (empty($divs)) {
-            $divs = [
-                ['code' => 'WRAP', 'name' => 'Wrapping'],
-                ['code' => 'CELL', 'name' => 'Cellular'],
-                ['code' => 'REFL', 'name' => 'Refleksi'],
-                ['code' => 'MINI', 'name' => 'Minimarket'],
-                ['code' => 'FNB', 'name' => 'FnB'],
-                ['code' => 'FIN', 'name' => 'Finance'],
-                ['code' => 'MC', 'name' => 'Money Changer'],
-            ];
-        }
+        $divisions = Division::orderBy('sort_order', 'asc')->get();
+        $divs = $divisions->map(fn ($d) => ['code' => $d->code, 'name' => $d->name])->toArray();
 
         $result = [];
         foreach ($divs as $div) {

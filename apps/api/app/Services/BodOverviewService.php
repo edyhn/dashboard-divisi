@@ -9,29 +9,12 @@ class BodOverviewService
 {
     public function getOverview(?string $periodFrom = null, ?string $periodTo = null): array
     {
-        try {
-            $divisions = Division::orderBy('sort_order', 'asc')->get();
-            $divs = $divisions->map(fn ($d) => [
-                'code' => $d->code,
-                'name' => $d->name,
-                'updated_at' => $d->updated_at?->toISOString() ?? now()->toISOString(),
-            ])->toArray();
-        } catch (Throwable) {
-            $divs = [];
-        }
-
-        if (empty($divs)) {
-            $nowStr = now()->toISOString();
-            $divs = [
-                ['code' => 'WRAP', 'name' => 'Wrapping', 'updated_at' => $nowStr],
-                ['code' => 'CELL', 'name' => 'Cellular', 'updated_at' => $nowStr],
-                ['code' => 'REFL', 'name' => 'Refleksi', 'updated_at' => $nowStr],
-                ['code' => 'MINI', 'name' => 'Minimarket', 'updated_at' => $nowStr],
-                ['code' => 'FNB', 'name' => 'FnB', 'updated_at' => $nowStr],
-                ['code' => 'FIN', 'name' => 'Finance', 'updated_at' => $nowStr],
-                ['code' => 'MC', 'name' => 'Money Changer', 'updated_at' => $nowStr],
-            ];
-        }
+        $divisions = Division::orderBy('sort_order', 'asc')->get();
+        $divs = $divisions->map(fn ($d) => [
+            'code' => $d->code,
+            'name' => $d->name,
+            'updated_at' => $d->updated_at?->toISOString() ?? now()->toISOString(),
+        ])->toArray();
 
         $now = now();
         $from = $periodFrom ?? $now->format('Y-m-01');
