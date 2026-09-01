@@ -13,7 +13,7 @@ export default function WorkforcePage() {
     return <ErrorState description={err.message ?? 'Gagal muat context'} traceId={err.traceId} onRetry={()=>void ctx.refetch()} />;
   }
   if (!ctx.data) return <EmptyState />;
-  const data = ctx.data as unknown as { user: {role:string; divisionCode:string|null}; divisions:{code:string;name:string}[]; outlets:{code:string;name:string}[]; scope:string };
+  const data = ctx.data as unknown as { user: {id?: string; email?: string; role:string; divisionCode:string|null}; divisions:{code:string;name:string}[]; outlets:{code:string;name:string}[]; scope:string };
   return (
     <div className="space-y-6">
       <section className="rounded-card-lg border border-line bg-white p-5 shadow-card hover:shadow-card-hover transition-shadow">
@@ -30,8 +30,19 @@ export default function WorkforcePage() {
         <div className="rounded-card-lg border border-line bg-white p-5 shadow-card hover:shadow-card-hover transition-shadow"><p className="text-sm text-slate-500">Scope</p><p className="mt-2 text-sm font-semibold text-navy">{data.scope}</p></div>
       </section>
       <section className="rounded-card-lg border border-line bg-white p-5 shadow-card hover:shadow-card-hover transition-shadow">
-        <h2 className="text-lg font-semibold text-navy">Konteks real</h2>
-        <pre className="mt-3 max-h-64 overflow-auto rounded bg-surface p-3 text-xs">{JSON.stringify(ctx.data,null,2)}</pre>
+        <h2 className="text-lg font-semibold text-navy">Konteks real — {data.user.role} · {data.scope}</h2>
+        <p className="text-sm text-slate-500">User {data.user.email ?? data.user.id} · Division {data.user.divisionCode ?? '—'}</p>
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          <div className="rounded-card-lg border border-line/60 p-4 bg-surface/30">
+            <p className="text-xs uppercase tracking-wider text-slate-400">Divisi terlihat ({data.divisions.length})</p>
+            <div className="mt-2 flex flex-wrap gap-1.5">{data.divisions.map((d)=> <span key={d.code} className="rounded-pill bg-white border border-line px-2 py-1 text-xs font-medium text-navy">{d.code} · {d.name}</span>)}</div>
+          </div>
+          <div className="rounded-card-lg border border-line/60 p-4">
+            <p className="text-xs uppercase tracking-wider text-slate-400">Outlet terlihat ({data.outlets.length})</p>
+            <div className="mt-2 flex flex-wrap gap-1.5">{data.outlets.length===0 ? <span className="text-xs text-slate-400">Tidak ada outlet</span> : data.outlets.slice(0,8).map((o)=> <span key={o.code} className="rounded-pill bg-primary-light border border-primary/20 px-2 py-1 text-xs font-medium text-primary">{o.code}</span>)}{data.outlets.length>8 && <span className="text-xs text-slate-400">+{data.outlets.length-8} lagi</span>}</div>
+          </div>
+        </div>
+        <p className="mt-3 text-xs text-slate-400">Source /org/me/context · scope {data.scope} · Privacy guard aktif</p>
       </section>
     </div>
   );

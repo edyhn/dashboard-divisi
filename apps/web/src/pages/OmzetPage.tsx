@@ -64,9 +64,19 @@ export default function OmzetPage() {
               const e = error as unknown as { message?: string; traceId?: string };
               return <ErrorState description={e.message ?? 'Gagal memuat revenue'} traceId={e.traceId} onRetry={() => void refetch()} />;
             }
-            if (!data || (Array.isArray(data) && data.length === 0)) return <EmptyState description="Belum ada revenue daily untuk filter ini." />;
-            return <pre className="mt-4 max-h-64 overflow-auto rounded bg-surface p-3 text-xs">{JSON.stringify(data, null, 2)}</pre>;
+            const rows = Array.isArray(data) ? (data as unknown as { id?: string; date?: string; division_code?: string; outlet_code?: string; amount?: string; gross_amount?: string }[]) : [];
+            if (!data || rows.length === 0) return <EmptyState description="Belum ada revenue daily untuk filter ini." />;
+            return (
+              <div className="mt-4 overflow-x-auto rounded-card-lg border border-line/60">
+                <table className="min-w-[520px] w-full text-left text-sm">
+                  <caption className="sr-only">Revenue daily</caption>
+                  <thead className="bg-surface text-slate-500"><tr><th scope="col" className="px-4 py-3">Tanggal</th><th scope="col" className="px-4 py-3">Outlet</th><th scope="col" className="px-4 py-3">Nominal</th></tr></thead>
+                  <tbody className="divide-y divide-line/60">{rows.slice(0,10).map((r, i)=> <tr key={r.id ?? `${r.date}-${i}`}><td className="px-4 py-3 font-mono text-xs text-navy">{r.date ?? '—'}</td><td className="px-4 py-3 text-slate-600">{r.outlet_code ?? r.division_code ?? '—'}</td><td className="px-4 py-3 font-mono text-xs font-semibold text-navy">Rp {r.amount ?? r.gross_amount ?? '0'}</td></tr>)}</tbody>
+                </table>
+              </div>
+            );
           })()}
+          <p className="mt-2 text-xs text-slate-400 lg:hidden">Geser → untuk lihat kolom</p>
         </article>
       </section>
 
