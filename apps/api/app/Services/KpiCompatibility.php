@@ -4,6 +4,10 @@ namespace App\Services;
 
 class KpiCompatibility
 {
+    /**
+     * SOP: sumber kebenaran = DivisionConfig (DB), const ini hanya default seed (sinkron dengan DatabaseSeeder::DIVISION_CONFIGS).
+     * Saat DB terisi, resolveKpiMap() akan baca dari division_configs.
+     */
     public const DIVISION_KPIS = [
         'WRAP' => [
             ['code' => 'revenue.gross', 'level' => 'division', 'unit' => 'idr', 'formula' => 'sum(revenue.daily)', 'version' => 'v1'],
@@ -46,8 +50,9 @@ class KpiCompatibility
 
     public static function areDivisionsCompatible(string $divisionA, string $divisionB, string $kpiCode): bool
     {
-        $kpisA = self::DIVISION_KPIS[$divisionA] ?? [];
-        $kpisB = self::DIVISION_KPIS[$divisionB] ?? [];
+        $map = self::resolveKpiMap();
+        $kpisA = $map[$divisionA] ?? [];
+        $kpisB = $map[$divisionB] ?? [];
 
         $kpiA = null;
         foreach ($kpisA as $k) {
@@ -72,9 +77,36 @@ class KpiCompatibility
         return self::isKpiCompatible($kpiA, $kpiB);
     }
 
+    private static function resolveKpiMap(): array
+    {
+        try {
+            $configs = \App\Models\DivisionConfig::with('division')->get();
+            if ($configs->isNotEmpty()) {
+                $map = [];
+                foreach ($configs as $c) {
+                    $code = $c->division->code;
+                    // enabled_kpis adalah array code saja di DB, rebuild ke structure default untuk compatibility check
+                    $kpis = [];
+                    foreach ($c->enabled_kpis ?? [] as $kpiCode) {
+                        $def = null;
+                        foreach (self::DIVISION_KPIS[$code] ?? [] as $dk) {
+                            if ($dk['code'] === $kpiCode) { $def = $dk; break; }
+                        }
+                        $kpis[] = $def ?? ['code' => $kpiCode, 'level' => 'division', 'unit' => 'mixed', 'formula' => 'custom', 'version' => 'v1'];
+                    }
+                    $map[$code] = $kpis;
+                }
+                return $map;
+            }
+        } catch (\Throwable) {
+            // fallback ke default saat DB belum siap (migrasi/testing)
+        }
+        return self::DIVISION_KPIS;
+    }
+
     public static function getCompatibleDivisions(string $kpiCode): array
     {
-        $allDivs = array_keys(self::DIVISION_KPIS);
+        $allDivs = array_keys(self::resolveKpiMap());
         $groups = [];
         $visited = [];
 

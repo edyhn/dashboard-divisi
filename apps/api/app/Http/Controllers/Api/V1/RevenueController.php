@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\BatchUploadRequest;
+use App\Http\Requests\StoreRevenueRequest;
 use App\Services\RevenueService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -35,22 +36,9 @@ class RevenueController extends Controller
         );
     }
 
-    public function storeDaily(Request $request): JsonResponse
+    public function storeDaily(StoreRevenueRequest $request): JsonResponse
     {
-        $payload = $request->validate([
-            'outletId' => ['required', 'string'],
-            'businessDate' => ['required', 'string'],
-            'grossRevenue' => ['required', 'numeric', 'min:0'],
-            'netRevenue' => ['required', 'numeric', 'min:0'],
-            'discountAmount' => ['nullable', 'numeric', 'min:0'],
-            'returnAmount' => ['nullable', 'numeric', 'min:0'],
-            'transactionCount' => ['nullable', 'integer', 'min:0'],
-            'note' => ['nullable', 'string', 'max:255'],
-            'payments' => ['nullable', 'array'],
-            'payments.*.method' => ['required_with:payments', 'string'],
-            'payments.*.amount' => ['required_with:payments', 'numeric'],
-            'payments.*.transactionCount' => ['nullable', 'integer', 'min:0'],
-        ]);
+        $payload = $request->validated();
 
         return response()->json(
             $this->revenue->createDaily($this->user($request), $payload),
@@ -58,23 +46,12 @@ class RevenueController extends Controller
         );
     }
 
-    public function batchUpload(Request $request): JsonResponse
+    public function batchUpload(BatchUploadRequest $request): JsonResponse
     {
-        $request->validate([
-            'file' => ['required', 'file', 'mimes:xlsx,zip', 'max:10240'],
-            'divisionCode' => ['nullable', 'string'],
-            'period' => ['nullable', 'string'],
-        ]);
-
         $file = $request->file('file');
-        if (! $file || ! $file->isValid()) {
-            throw new ApiException('VALIDATION_ERROR', 'File upload tidak valid', [
-                ['field' => 'file', 'code' => 'INVALID', 'message' => 'Unggah file .xlsx'],
-            ]);
-        }
 
         return response()->json(
-            $this->revenue->batchUpload($this->user($request), $file, $request->all()),
+            $this->revenue->batchUpload($this->user($request), $file, $request->validated()),
             201
         );
     }

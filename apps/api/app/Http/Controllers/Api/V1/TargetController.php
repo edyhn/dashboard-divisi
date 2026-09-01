@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ReturnTargetRequest;
+use App\Http\Requests\UpsertTargetRequest;
 use App\Services\TargetService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -27,16 +29,9 @@ class TargetController extends Controller
         );
     }
 
-    public function storeTenantTarget(Request $request): JsonResponse
+    public function storeTenantTarget(UpsertTargetRequest $request): JsonResponse
     {
-        $payload = $request->validate([
-            'outletId' => ['required', 'string'],
-            'periodMonth' => ['required', 'string'],
-            'metricType' => ['nullable', 'string'],
-            'amount' => ['required', 'numeric', 'min:0'],
-            'action' => ['nullable', 'string'],
-            'note' => ['nullable', 'string', 'max:255'],
-        ]);
+        $payload = $request->validated();
 
         return response()->json(
             $this->targets->upsertTenantTarget($this->user($request), $payload),
@@ -51,11 +46,9 @@ class TargetController extends Controller
         );
     }
 
-    public function returnTarget(Request $request, string $id): JsonResponse
+    public function returnTarget(ReturnTargetRequest $request, string $id): JsonResponse
     {
-        $payload = $request->validate([
-            'note' => ['required', 'string', 'max:255'],
-        ]);
+        $payload = $request->validated();
 
         return response()->json(
             $this->targets->returnTarget($this->user($request), $id, $payload['note'])

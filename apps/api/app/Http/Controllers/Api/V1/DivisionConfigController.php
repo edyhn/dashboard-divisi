@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpsertDivisionConfigRequest;
+use App\Http\Resources\DivisionConfigResource;
 use App\Services\DivisionConfigService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class DivisionConfigController extends Controller
 {
@@ -18,7 +19,7 @@ class DivisionConfigController extends Controller
     {
         $data = $this->configService->getAllConfigs();
 
-        return response()->json($data);
+        return response()->json(DivisionConfigResource::collection($data)->toArray(request()));
     }
 
     public function getOne(string $divisionCode): JsonResponse
@@ -28,16 +29,14 @@ class DivisionConfigController extends Controller
             throw new ApiException('RESOURCE_NOT_FOUND', "Division {$divisionCode} not found");
         }
 
-        return response()->json($cfg);
+        return response()->json((new DivisionConfigResource($cfg))->toArray(request()));
     }
 
-    public function upsert(Request $request, string $divisionCode): JsonResponse
+    public function upsert(UpsertDivisionConfigRequest $request, string $divisionCode): JsonResponse
     {
-        $modules = $request->input('enabledModules', []);
-        $kpis = $request->input('enabledKpis', []);
+        $validated = $request->validated();
+        $result = $this->configService->upsertConfig($divisionCode, $validated['enabledModules'], $validated['enabledKpis']);
 
-        $result = $this->configService->upsertConfig($divisionCode, $modules, $kpis);
-
-        return response()->json($result);
+        return response()->json((new DivisionConfigResource($result))->toArray(request()));
     }
 }

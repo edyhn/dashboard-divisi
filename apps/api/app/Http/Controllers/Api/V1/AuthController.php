@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\ResetPasswordRequest;
 use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,16 +16,10 @@ class AuthController extends Controller
         protected AuthService $authService
     ) {}
 
-    public function login(Request $request): JsonResponse
+    public function login(LoginRequest $request): JsonResponse
     {
-        $email = $request->input('email');
-        $password = $request->input('password');
-
-        if (empty($email) || empty($password)) {
-            throw new ApiException('VALIDATION_ERROR', 'Email dan password wajib');
-        }
-
-        $result = $this->authService->login($email, $password);
+        $validated = $request->validated();
+        $result = $this->authService->login($validated['email'], $validated['password']);
 
         // Set httpOnly cookie access_token for browser session tests (UAT-ACC-08)
         $cookie = new Cookie(
@@ -70,14 +65,13 @@ class AuthController extends Controller
         return response()->json($result);
     }
 
-    public function reset(Request $request): JsonResponse
+    public function reset(ResetPasswordRequest $request): JsonResponse
     {
         $user = $request->attributes->get('user');
         $userId = $user['sub'] ?? '';
-        $oldPassword = (string) $request->input('oldPassword', '');
-        $newPassword = (string) $request->input('newPassword', '');
+        $validated = $request->validated();
 
-        $result = $this->authService->resetPassword($userId, $oldPassword, $newPassword);
+        $result = $this->authService->resetPassword($userId, $validated['oldPassword'], $validated['newPassword']);
 
         return response()->json($result);
     }
