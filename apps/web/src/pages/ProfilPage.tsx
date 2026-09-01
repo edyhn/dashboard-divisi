@@ -1,4 +1,5 @@
 import { StatusPill } from '../components/StatusPill';
+import { roleDisplay } from '../mocks/session';
 import { useAuth } from '../session/AuthContext';
 
 const selfService = [
@@ -37,7 +38,7 @@ export default function ProfilPage() {
             {user.name.slice(0, 1)}
           </div>
           <h2 className="mt-4 text-lg font-semibold text-navy">{user.name}</h2>
-          <p className="mt-1 text-sm text-slate-500">{user.role}</p>
+          <p className="mt-1 text-sm text-slate-500">{roleDisplay(user.role)}</p>
           <p className="mt-1 text-sm text-slate-500">{user.divisionCode ?? 'Semua divisi'}</p>
           <div className="mt-4 rounded-card-lg bg-surface p-4 text-sm text-slate-600">
             Session demo tersimpan lokal dan dapat diganti dari RoleSwitcher.
@@ -79,7 +80,7 @@ export default function ProfilPage() {
         <article className="rounded-card-lg border border-line bg-white p-5 shadow-card hover:shadow-card-hover transition-shadow">
           <h2 className="text-lg font-semibold text-navy">Privacy guard</h2>
           <div className="mt-4 space-y-3 text-sm text-slate-600">
-            <p className="rounded-card-lg border border-line p-4">USER hanya melihat profil, jadwal, absensi, cuti, dan lembur milik sendiri.</p>
+            <p className="rounded-card-lg border border-line p-4">Admin hanya melihat profil, jadwal, absensi, cuti, dan lembur milik sendiri.</p>
             <p className="rounded-card-lg border border-line p-4">Payroll detail dan data karyawan lain tidak ditampilkan di self-view.</p>
             <p className="rounded-card-lg border border-line p-4">Menu mengikuti capability role aktif, bukan hardcode halaman.</p>
           </div>

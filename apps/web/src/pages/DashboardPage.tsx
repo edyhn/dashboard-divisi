@@ -2,13 +2,15 @@ import { TrendingUp, Users, Target, Award, ArrowUpRight } from 'lucide-react';
 import { StatusPill } from '../components/StatusPill';
 import { EmptyState, ErrorState, LoadingState } from '../components/states';
 import { OrgFilters } from '../components/filters/OrgFilters';
+import { roleDisplay } from '../mocks/session';
 import { useAuth } from '../session/AuthContext';
 import { useBodOverview } from '../hooks/useBod';
 import { useOrgFilters } from '../components/filters/OrgFilters';
 
 function formatScope(role: string | undefined, divisionCode: string | null | undefined) {
-  if (!divisionCode) return `${role ?? '-'} · semua divisi`;
-  return `${role} · ${divisionCode}`;
+  const label = roleDisplay(role ?? '');
+  if (!divisionCode) return `${label} · semua divisi`;
+  return `${label} · ${divisionCode}`;
 }
 
 export default function DashboardPage() {

@@ -1,5 +1,5 @@
 import { DIVISION_CODES } from '../config/divisions';
-import { ROLES } from '../mocks/session';
+import { ROLES, roleDisplay } from '../mocks/session';
 import type { Role } from '../mocks/session';
 import { useSession } from '../session/SessionContext';
 
@@ -18,7 +18,7 @@ export function RoleSwitcher() {
         >
           {ROLES.map((role) => (
             <option key={role} value={role}>
-              {role}
+              {roleDisplay(role)} ({role})
             </option>
           ))}
         </select>

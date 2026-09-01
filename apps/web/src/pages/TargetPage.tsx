@@ -79,7 +79,7 @@ export default function TargetPage() {
       <section className="rounded-card-lg border border-line bg-white p-5 shadow-card hover:shadow-card-hover transition-shadow">
         <h2 className="text-lg font-semibold text-navy">Run-rate (sisa harian)</h2>
         {runRate.isLoading ? <p className="text-sm text-slate-500">Memuat run-rate...</p> : runRate.error ? <p className="text-sm text-danger">{(runRate.error as Error).message}</p> : <pre className="mt-2 max-h-32 overflow-auto rounded bg-surface p-3 text-xs">{JSON.stringify(runRate.data, null, 2)}</pre>}
-        <p className="mt-2 text-xs text-slate-400">Scope {divisionCode ?? 'semua'} · MANAGER 1:1, BOD lintas</p>
+        <p className="mt-2 text-xs text-slate-400">Scope {divisionCode ?? 'semua'} · Superadmin 1:1, Executive lintas</p>
       </section>
       <section className="rounded-card-lg border border-line bg-white p-5 shadow-card hover:shadow-card-hover transition-shadow">
         <h2 className="text-lg font-semibold text-navy">BOD review detail</h2>

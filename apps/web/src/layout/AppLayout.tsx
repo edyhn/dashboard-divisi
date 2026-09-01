@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { LayoutDashboard, TrendingUp, Target, Award, Users, ClipboardList, BarChart3, Settings, LogOut, Menu, X } from 'lucide-react';
-import { MENU_ITEMS } from '../mocks/session';
+import { MENU_ITEMS, roleDisplay } from '../mocks/session';
 import { useAuth } from '../session/AuthContext';
 import { useSession } from '../session/SessionContext';
 import { hasCapability } from '../session/capability';
@@ -53,6 +53,7 @@ export function AppLayout() {
   }
 
   const activeMenu = MENU_ITEMS.find((item) => item.path === location.pathname);
+  const roleLabel = roleDisplay(user.role);
   const scopeLabel = user.divisionCode ?? 'Semua divisi';
 
   const visibleMenu = MENU_ITEMS.filter((item) => {
@@ -100,7 +101,7 @@ export function AppLayout() {
                 return <NavLink key={item.path} to={item.path} onClick={() => setDrawerOpen(false)} className={({ isActive }) => isActive ? 'flex items-center gap-2.5 rounded-card-lg bg-white/15 px-3 py-2.5 text-sm font-medium text-white shadow-glass' : 'flex items-center gap-2.5 rounded-card-lg px-3 py-2.5 text-sm font-medium text-slate-300 hover:bg-white/10'}><Icon className="h-4 w-4" />{item.label}</NavLink>;
               })}
             </nav>
-            <div className="absolute bottom-4 left-4 right-4 rounded-card-lg bg-white/10 p-3"><p className="text-xs font-medium text-white">{user.name}</p><p className="text-xs text-slate-300">{user.role} · {scopeLabel}</p><button onClick={() => void logout()} className="mt-2 flex w-full items-center gap-1.5 rounded-input bg-white/10 px-2 py-1.5 text-xs font-medium text-white hover:bg-white/15"><LogOut className="h-3.5 w-3.5" /> Keluar</button></div>
+            <div className="absolute bottom-4 left-4 right-4 rounded-card-lg bg-white/10 p-3"><p className="text-xs font-medium text-white">{user.name}</p><p className="text-xs text-slate-300">{roleLabel} · {scopeLabel}</p><button onClick={() => void logout()} className="mt-2 flex w-full items-center gap-1.5 rounded-input bg-white/10 px-2 py-1.5 text-xs font-medium text-white hover:bg-white/15"><LogOut className="h-3.5 w-3.5" /> Keluar</button></div>
           </aside>
         </div>
       )}
@@ -117,7 +118,7 @@ export function AppLayout() {
         <div className="absolute bottom-4 left-4 right-4">
           <div className="rounded-card bg-white/10 p-3">
             <p className="text-xs font-medium text-white">{user.name}</p>
-            <p className="text-xs text-slate-300">{user.role} · {scopeLabel}</p>
+            <p className="text-xs text-slate-300">{roleLabel} · {scopeLabel}</p>
             <button onClick={() => void logout()} className="mt-2 flex w-full items-center gap-1.5 rounded-input bg-white/10 px-2 py-1.5 text-xs font-medium text-white hover:bg-white/15 transition-colors">
               <LogOut className="h-3.5 w-3.5" /> Keluar
             </button>
@@ -145,7 +146,7 @@ export function AppLayout() {
             <div className="flex items-center gap-3">
               <div className="hidden lg:flex items-center gap-2 rounded-full bg-surface px-3 py-1.5 text-xs">
                 <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
-                <span className="font-medium text-navy">{user.role}</span>
+                <span className="font-medium text-navy">{roleLabel}</span>
                 <span className="text-slate-400">·</span>
                 <span className="text-slate-600">{scopeLabel}</span>
               </div>
@@ -168,7 +169,7 @@ export function AppLayout() {
             </div>
             <div className="rounded-card-lg border border-line/60 bg-white p-4 shadow-card hover:shadow-card-hover transition-shadow">
               <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Scope aktif</p>
-              <p className="mt-1 text-sm font-semibold text-navy">{user.role} · {scopeLabel}</p>
+              <p className="mt-1 text-sm font-semibold text-navy">{roleLabel} · {scopeLabel}</p>
               <p className="text-xs text-slate-500">Envelope trace_id aktif</p>
             </div>
             <div className="rounded-card-lg border border-line/60 bg-gradient-to-br from-success-light to-white p-4 shadow-card">

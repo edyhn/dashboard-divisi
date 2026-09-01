@@ -68,7 +68,7 @@ describe('ORG-06 Menu per capability', () => {
 
     expect(screen.getByText('Breadcrumb')).toBeTruthy();
     expect(screen.getAllByText('Target & Realisasi').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('MANAGER · WRAP').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Superadmin · WRAP').length).toBeGreaterThan(0);
     expect(screen.getByText('Sinkron real-time')).toBeTruthy();
   });
 });
