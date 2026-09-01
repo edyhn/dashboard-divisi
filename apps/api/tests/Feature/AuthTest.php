@@ -1,0 +1,140 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Tests\TestCase;
+
+class AuthTest extends TestCase
+{
+    public function test_login_success_returns_jwt_and_sets_cookie(): void
+    {
+        $response = $this->postJson('/api/v1/auth/login', [
+            'email' => 'bod1@dashboard.test',
+            'password' => 'Password123!',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data' => [
+                'accessToken',
+                'user' => ['id', 'email', 'name', 'role', 'divisionCode'],
+            ],
+            'meta' => ['trace_id'],
+            'links' => ['self'],
+        ]);
+
+        $this->assertEquals('bod1@dashboard.test', $response->json('data.user.email'));
+        $this->assertEquals('BOD', $response->json('data.user.role'));
+        $this->assertNull($response->json('data.user.divisionCode'));
+        $this->assertNotEmpty($response->json('data.accessToken'));
+        $response->assertCookie('access_token');
+    }
+
+    public function test_login_with_invalid_credentials_returns_auth_required(): void
+    {
+        $response = $this->postJson('/api/v1/auth/login', [
+            'email' => 'bod1@dashboard.test',
+            'password' => 'WrongPassword',
+        ]);
+
+        $response->assertStatus(401);
+        $this->assertEquals('AUTH_REQUIRED', $response->json('error.code'));
+        $this->assertEquals('Email atau password salah', $response->json('error.message'));
+    }
+
+    public function test_login_with_missing_credentials_returns_validation_error(): void
+    {
+        $response = $this->postJson('/api/v1/auth/login', [
+            'email' => '',
+            'password' => '',
+        ]);
+
+        $response->assertStatus(400);
+        $this->assertEquals('VALIDATION_ERROR', $response->json('error.code'));
+    }
+
+    public function test_me_with_bearer_token_and_cookie(): void
+    {
+        // 1. Bearer token
+        $response = $this->authenticated('manager.wrap@dashboard.test')->getJson('/api/v1/auth/me');
+        $response->assertStatus(200);
+        $this->assertEquals('manager.wrap@dashboard.test', $response->json('data.email'));
+        $this->assertEquals('MANAGER', $response->json('data.role'));
+        $this->assertEquals('WRAP', $response->json('data.divisionCode'));
+
+        // 2. Cookie authentication
+        $token = $this->getJwtTokenForUser('admin.mini@dashboard.test');
+        $cookieResponse = $this->flushHeaders()->call('GET', '/api/v1/auth/me', cookies: ['access_token' => $token]);
+        $cookieResponse->assertStatus(200);
+        $this->assertEquals('admin.mini@dashboard.test', $cookieResponse->json('data.email'));
+        $this->assertEquals('ADMIN', $cookieResponse->json('data.role'));
+        $this->assertEquals('MINI', $cookieResponse->json('data.divisionCode'));
+    }
+
+    public function test_me_without_auth_returns_401(): void
+    {
+        $response = $this->getJson('/api/v1/auth/me');
+        $response->assertStatus(401);
+        $this->assertEquals('AUTH_REQUIRED', $response->json('error.code'));
+    }
+
+    public function test_logout_revokes_token_and_clears_cookie(): void
+    {
+        $token = $this->getJwtTokenForUser('bod1@dashboard.test');
+
+        $logoutRes = $this->withHeader('Authorization', 'Bearer ' . $token)
+            ->postJson('/api/v1/auth/logout');
+
+        $logoutRes->assertStatus(200);
+        $this->assertEquals('Logout berhasil', $logoutRes->json('data.message'));
+
+        // Subsequent access with revoked token should fail with 401
+        $meRes = $this->withHeader('Authorization', 'Bearer ' . $token)
+            ->getJson('/api/v1/auth/me');
+
+        $meRes->assertStatus(401);
+        $this->assertEquals('AUTH_REQUIRED', $meRes->json('error.code'));
+        $this->assertEquals('Sesi sudah logout', $meRes->json('error.message'));
+    }
+
+    public function test_reset_password_validates_and_updates_credentials(): void
+    {
+        $token = $this->getJwtTokenForUser('bod2@dashboard.test');
+
+        // Short password fails with 400 VALIDATION_ERROR
+        $shortRes = $this->withHeader('Authorization', 'Bearer ' . $token)
+            ->postJson('/api/v1/auth/reset', [
+                'oldPassword' => 'Password123!',
+                'newPassword' => 'short',
+            ]);
+        $shortRes->assertStatus(400);
+        $this->assertEquals('VALIDATION_ERROR', $shortRes->json('error.code'));
+
+        // Wrong old password fails with 401 AUTH_REQUIRED
+        $wrongOld = $this->withHeader('Authorization', 'Bearer ' . $token)
+            ->postJson('/api/v1/auth/reset', [
+                'oldPassword' => 'WrongOldPassword',
+                'newPassword' => 'NewValidPassword123!',
+            ]);
+        $wrongOld->assertStatus(401);
+        $this->assertEquals('AUTH_REQUIRED', $wrongOld->json('error.code'));
+
+        // Valid reset succeeds
+        $success = $this->withHeader('Authorization', 'Bearer ' . $token)
+            ->postJson('/api/v1/auth/reset', [
+                'oldPassword' => 'Password123!',
+                'newPassword' => 'NewValidPassword123!',
+            ]);
+        $success->assertStatus(200);
+        $this->assertEquals('Password berhasil direset', $success->json('data.message'));
+
+        // Login with new password succeeds
+        $loginRes = $this->postJson('/api/v1/auth/login', [
+            'email' => 'bod2@dashboard.test',
+            'password' => 'NewValidPassword123!',
+        ]);
+        $loginRes->assertStatus(200);
+    }
+}

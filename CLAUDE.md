@@ -11,51 +11,57 @@ pnpm install
 pnpm check:env          # node >=22 + pnpm ada di PATH
 pnpm lint               # eslint . (root, semua workspace)
 pnpm typecheck          # pnpm -r typecheck
-pnpm test               # pnpm -r test (vitest run)
+pnpm test               # pnpm -r test (vitest web/contracts + php artisan test api)
 pnpm build              # pnpm -r build
 
 # per workspace
 pnpm --filter @dashboard-divisi/web dev      # Vite, http://localhost:5173
-pnpm --filter @dashboard-divisi/api build && pnpm --filter @dashboard-divisi/api start   # api tidak punya `dev`; http://localhost:3000/api/v1
-pnpm --filter @dashboard-divisi/api test
+pnpm --filter @dashboard-divisi/api start    # Laravel serve, http://localhost:3000/api/v1
+pnpm --filter @dashboard-divisi/api test     # php artisan test
+
+# Laravel direct commands (apps/api)
+cd apps/api && php artisan test
+cd apps/api && php artisan migrate
+cd apps/api && php artisan db:seed           # idempotent: 7 divisi + 7 outlet + 17 akun
+cd apps/api && php artisan serve --port 3000
 ```
 
-Satu file test / satu test: `pnpm --filter @dashboard-divisi/api exec vitest run src/auth/policy.spec.ts -t "nama test"` (sama untuk `web`).
+Satu file test / satu test di Laravel:
+`cd apps/api && php artisan test --filter=PolicyTest` (atau `AuthTest`, `ApiContractTest`, `ScopeIntegrationTest`, dll).
 
-Database (`packages/db`, butuh `DATABASE_URL`):
+Database (`apps/api/database/migrations`, butuh PostgreSQL atau `DATABASE_URL`):
 
 ```bash
-pnpm --filter @dashboard-divisi/db db:generate   # prisma generate — WAJIB setelah ubah schema, sebelum typecheck api
-pnpm --filter @dashboard-divisi/db db:migrate    # migrate dev
-pnpm --filter @dashboard-divisi/db db:seed       # idempotent: 7 divisi + 7 outlet + 17 akun
-pnpm --filter @dashboard-divisi/db db:reset
+cd apps/api && php artisan migrate:fresh --seed
 ```
 
-Gate PR = urutan CI (`.github/workflows/ci.yml`): check:env → lint → typecheck → build → test → `prisma validate` → `prisma format --check` → `db:generate` → migration dry-run. `prisma format --check` gagal kalau schema tidak diformat.
+Gate PR = urutan CI (`.github/workflows/ci.yml`): check:env → lint → typecheck → build → test → `prisma validate` → `prisma format --check` → migration dry-run.
 
 ## Arsitektur
 
-Monorepo pnpm: `apps/api` (NestJS 11), `apps/web` (React 19 + Vite + Tailwind v4), `packages/contracts` (tipe envelope bersama FE/BE), `packages/db` (Prisma — sengaja di luar `apps/api`, deviasi ARD §15.1).
+Monorepo: `apps/api` (Laravel 13 + PHP 8.5), `apps/web` (React 19 + Vite + Tailwind v4), `packages/contracts` (tipe envelope bersama FE/BE), `packages/db` (Prisma schema & DB tooling).
 
-**Envelope API — jangan dilanggar.** Semua response melewati `apps/api/src/app.setup.ts` (`configureApp`, dipakai `main.ts` *dan* test harness):
-- controller mengembalikan **data mentah**; `ApiEnvelopeInterceptor` membungkus jadi `{ data, meta: { trace_id }, links: { self } }`.
-- error: lempar `ApiError(code, message, fields?)` dari `common/api-error.ts`. Kode error → HTTP status dipetakan di `API_ERROR_HTTP_STATUS`; `AllExceptionsFilter` merender `{ error: { code, message, fields?, trace_id } }` dan tidak boleh membocorkan stack.
-- `trace_id` berasal dari `traceIdMiddleware` (`req.traceId`), prefix global `api/v1`.
-- Bentuk-bentuk ini dideklarasikan di `packages/contracts/src/index.ts` — ubah di sana, bukan duplikat lokal.
+**Envelope API — jangan dilanggar.** Semua response melewati middleware dan error handler terpusat di `apps/api/bootstrap/app.php`:
+- Controller mengembalikan **JsonResponse / data mentah**; `ApiEnvelopeMiddleware` membungkus otomatis menjadi `{ data, meta: { trace_id }, links: { self } }`.
+- Error: lempar `ApiException(code, message, fields?)` dari `app/Exceptions/ApiException.php`. Kode error → HTTP status dipetakan di `ApiException::HTTP_STATUS`; Exception handler di `bootstrap/app.php` merender `{ error: { code, message, fields?, trace_id } }` dan tidak boleh membocorkan stack atau kredensial internal.
+- `trace_id` berasal dari `TraceIdMiddleware` (`X-Trace-Id` request/response header), prefix global `api/v1`.
+- Bentuk kontrak dideklarasikan di `packages/contracts/src/index.ts`.
 
-**Otorisasi berlapis** (`apps/api/src/auth/`): `JwtAuthGuard` mengisi `req.user: JwtPayload` → `CapabilityGuard` + `@RequireCapability()` → `ScopeGuard` yang mengambil `divisionCode` dari params/query/body dan memanggil `PolicyService.assertDivisionScope`. Aturan: **BOD dengan `divisionCode === null` lintas 7 divisi; MANAGER/ADMIN strict 1:1**. Query di service layer tetap harus memfilter per divisi sendiri — guard hanya menangkap divisionCode yang eksplisit dikirim. Setiap penolakan capability/scope di-`audit.log()` (fire-and-forget).
+**Otorisasi berlapis** (`apps/api/app/Http/Middleware/` & `apps/api/app/Services/PolicyService.php`):
+- `JwtAuthMiddleware` (`jwt.auth`) membaca JWT dari Bearer header, httpOnly cookie `access_token`, atau header `x-access-token`, memvalidasi revocation/logout via `TokenRevocationService`, lalu mengisi `$request->attributes->set('user', $payload)`.
+- `CapabilityMiddleware` (`capability:<name>`) memanggil `PolicyService::assertCapability`.
+- `ScopeMiddleware` (`scope`) mengekstrak `divisionCode` dan memanggil `PolicyService::assertDivisionScope`.
+- Aturan: **BOD dengan `divisionCode === null` lintas 7 divisi; MANAGER/ADMIN strict 1:1**. Query di service layer tetap harus memfilter per divisi sendiri. Setiap penolakan capability/scope di-`audit->log()` (fire-and-forget).
 
-Peta capability ada **dua kali**: `apps/api/src/auth/policy.service.ts` (otoritatif, server-side) dan `apps/web/src/session/capability.ts` (hanya untuk menyembunyikan menu/route). Ubah keduanya bersamaan; web punya role legacy tambahan (SUPERADMIN/HRD/USER) yang belum ada di server.
+Peta capability ada **dua kali**: `apps/api/app/Services/PolicyService.php` (otoritatif, server-side) dan `apps/web/src/session/capability.ts` (hanya untuk menyembunyikan menu/route). Ubah keduanya bersamaan.
 
-**Audit append-only** (`audit/audit.service.ts`): `sanitizeMetadata` membuang key sensitif (password/token/cookie/secret) rekursif sebelum tulis. Jangan bypass — selalu lewat `AuditService.log`.
+**Audit append-only** (`app/Services/AuditService.php`): `sanitizeMetadata` membuang key sensitif (`password`, `passwordHash`, `token`, `access_token`, `authorization`, `cookie`, `secret`, `jwt`) rekursif sebelum tulis ke `audit_events`. Jangan bypass — selalu lewat `AuditService::log`.
 
-**Jalan tanpa DB.** `PrismaService.onModuleInit` menelan kegagalan connect saat `NODE_ENV=test`, `AuditService` punya array in-memory, dan beberapa read model (mis. `bod-read-model.service.ts`) punya fallback konstanta 7 divisi. Karena itu `pnpm test` hijau tanpa PostgreSQL. Pertahankan pola ini saat menambah service yang dipakai test: fallback, bukan throw.
-
-**Test harness** (`apps/api/src/test/harness.ts`): `createTestHarness()` membangun `AppModule` penuh + `configureApp`, listen di port 0, dan `audit.clearMemory()` per harness → test isolated, tidak bergantung urutan. Fixture wajib **anonim** (`src/test/fixtures.ts`); jangan pakai data pegawai nyata.
+**Jalan tanpa DB.** `AuditService` memiliki fallback in-memory, `AuthService` dan `BodReadModelService` memiliki mock fallback konstanta 7 divisi bila DB tidak terhubung. Karena itu `php artisan test` dan `pnpm test` berjalan bersih dan terisolasi.
 
 **Web** masih UI-first: session di-mock (`apps/web/src/mocks/session.ts` + `SessionContext`, role/divisi persisted di localStorage), belum memanggil API. State filter periode/divisi/outlet disimpan di URL (`components/filters/OrgFilters.tsx`), guard menu/route di `components/RouteGuard.tsx`.
 
-**Domain**: 7 divisi `WRAP, CELL, REFL, MINI, FNB, FIN, MC` — Finance dan Money Changer adalah divisi **terpisah**; 17 akun = 3 BOD + 7 Manager + 7 Admin. Konstanta ini muncul di seed, read model fallback, dan `bod/kpi-compatibility.ts` (KPI mana yang boleh dibandingkan lintas divisi). Divisi/outlet adalah **data konfigurasi**, bukan enum kode — tambah divisi lewat seed/DivisionConfig, jangan hardcode cabang baru.
+**Domain**: 7 divisi `WRAP, CELL, REFL, MINI, FNB, FIN, MC` — Finance dan Money Changer adalah divisi **terpisah**; 17 akun = 3 BOD + 7 Manager + 7 Admin. Konstanta ini muncul di seeder, read model fallback, dan `app/Services/KpiCompatibility.php` (KPI mana yang boleh dibandingkan lintas divisi). Divisi/outlet adalah **data konfigurasi**, bukan enum kode — tambah divisi lewat seeder/DivisionConfig, jangan hardcode cabang baru.
 
 ## Vault Obsidian (bukan kode)
 
