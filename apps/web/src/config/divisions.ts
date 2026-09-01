@@ -26,7 +26,10 @@ export function isDivisionCode(value: string): value is DivisionCode {
   return (DIVISION_CODES as readonly string[]).includes(value);
 }
 
-/** SOP: outlet mock — siap diganti fetch saat BE Laravel ready (SOP 1B: hooks) */
+/**
+ * @deprecated — diganti hooks/useOrg.ts GET /org/outlets (real BE, 2026-09-01).
+ * Dipertahankan untuk kompatibilitas test lama.
+ */
 export function getMockOutlets(divisionCode: string): string[] {
   if (!isDivisionCode(divisionCode)) return [];
   return [`${divisionCode}-001`, `${divisionCode}-002`];
