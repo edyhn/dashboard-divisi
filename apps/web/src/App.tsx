@@ -5,7 +5,9 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { RouteGuard } from './components/RouteGuard';
 import { LoadingState } from './components/states';
+import { ToastProvider } from './components/ui/Toast';
 import { AppLayout } from './layout/AppLayout';
+import { AuthProvider, useAuth } from './session/AuthContext';
 import { SessionProvider, useSession } from './session/SessionContext';
 import { homePathForRole } from './mocks/session';
 
@@ -20,10 +22,18 @@ const PenilaianPage = lazy(() => import('./pages/PenilaianPage'));
 const ProfilPage = lazy(() => import('./pages/ProfilPage'));
 const TargetPage = lazy(() => import('./pages/TargetPage'));
 const WorkforcePage = lazy(() => import('./pages/WorkforcePage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
 
 const queryClient = new QueryClient();
 
 function HomeRedirect() {
+  const { user, loading } = useAuth();
+  if (loading) return <div className="p-6 text-sm text-slate-500">Memuat sesi...</div>;
+  if (!user) return <Navigate to="/login" replace />;
+  return <Navigate to={homePathForRole(user.role as never)} replace />;
+}
+
+function AuthHomeRedirect() {
   const { user } = useSession();
   return <Navigate to={homePathForRole(user.role)} replace />;
 }
@@ -39,12 +49,16 @@ function RouteSuspense({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <SessionProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route element={<AppLayout />}>
-                <Route path="/" element={<HomeRedirect />} />
+      <ToastProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <SessionProvider>
+              <BrowserRouter>
+              <Routes>
+                <Route path="/login" element={<RouteSuspense><LoginPage /></RouteSuspense>} />
+                <Route element={<AppLayout />}>
+                  <Route path="/" element={<HomeRedirect />} />
+                  <Route path="/legacy" element={<AuthHomeRedirect />} />
                 <Route
                   path="/dashboard"
                   element={
@@ -141,11 +155,13 @@ export default function App() {
                     </RouteSuspense>
                   }
                 />
-              </Route>
-            </Routes>
-          </BrowserRouter>
-        </SessionProvider>
-      </QueryClientProvider>
+                </Route>
+              </Routes>
+              </BrowserRouter>
+            </SessionProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </ToastProvider>
     </ErrorBoundary>
   );
 }
