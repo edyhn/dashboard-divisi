@@ -41,3 +41,7 @@ Done when: transition hanya melalui command bisnis; reason return wajib. Owner: 
 ## Agent Log
 
 <!-- Agents append their progress updates here -->
+
+### 2026-09-01 — DIGI-11 (agent Beny)
+
+Use case draft/submit/approve/return + lock target selesai di backend (`TargetService`): SUBMITTED tidak bisa disubmit ulang, APPROVED/RETURNED tidak bisa diputuskan lagi (`INVALID_STATE_TRANSITION`). Reopen privileged belum dibuat.

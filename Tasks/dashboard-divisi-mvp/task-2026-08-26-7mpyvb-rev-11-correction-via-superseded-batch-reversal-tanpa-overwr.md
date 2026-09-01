@@ -41,3 +41,7 @@ Done when: UAT-REV-09 PASS dan lineage tetap utuh; histori tidak dioverwrite. Ow
 ## Agent Log
 
 <!-- Agents append their progress updates here -->
+
+### 2026-09-01 — DIGI-11 (agent Beny)
+
+Koreksi omzet tidak pernah menimpa: versi baru dibuat (`entry_type=CORRECTION`), versi lama `is_active=false` + `superseded_by_id`. Agregasi hanya membaca versi aktif. Diuji di `RevenueTest` dan `RevenueBatchUploadTest`.

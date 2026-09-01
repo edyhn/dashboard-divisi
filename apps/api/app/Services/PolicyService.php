@@ -8,7 +8,7 @@ class PolicyService
 {
     public const ROLE_CAPABILITIES = [
         'BOD' => ['*'],
-        'MANAGER' => ['view:division', 'manage:division', 'view:report', 'write:target', 'write:assessment'],
+        'MANAGER' => ['view:division', 'manage:division', 'view:report', 'write:revenue', 'write:target', 'write:assessment'],
         'ADMIN' => ['view:division', 'write:revenue', 'write:target', 'view:report'],
     ];
 
@@ -26,7 +26,7 @@ class PolicyService
 
     public function assertCapability(array $user, string $capability): void
     {
-        if (!$this->hasCapability($user, $capability)) {
+        if (! $this->hasCapability($user, $capability)) {
             $role = $user['role'] ?? 'UNKNOWN';
             $this->audit->log([
                 'actorId' => $user['sub'] ?? $user['id'] ?? null,
@@ -62,7 +62,7 @@ class PolicyService
 
     public function assertDivisionScope(array $user, ?string $divisionCode): void
     {
-        if (!$this->canAccessDivision($user, $divisionCode)) {
+        if (! $this->canAccessDivision($user, $divisionCode)) {
             $role = $user['role'] ?? 'UNKNOWN';
             $userDivision = $user['divisionCode'] ?? $user['division_code'] ?? null;
 
@@ -78,7 +78,7 @@ class PolicyService
 
             throw new ApiException(
                 'SCOPE_VIOLATION',
-                "Akses ditolak untuk divisi {$divisionCode} (user {$role}/" . ($userDivision ?? 'ALL') . ")"
+                "Akses ditolak untuk divisi {$divisionCode} (user {$role}/".($userDivision ?? 'ALL').')'
             );
         }
     }

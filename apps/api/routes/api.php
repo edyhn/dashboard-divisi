@@ -2,9 +2,13 @@
 
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BodController;
+use App\Http\Controllers\Api\V1\BudgetingController;
 use App\Http\Controllers\Api\V1\DivisionConfigController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\OrgController;
+use App\Http\Controllers\Api\V1\ReportController;
+use App\Http\Controllers\Api\V1\RevenueController;
+use App\Http\Controllers\Api\V1\TargetController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -39,6 +43,41 @@ Route::prefix('v1')->group(function () {
 
         Route::middleware(['capability:manage:division'])->group(function () {
             Route::post('division-configs/{divisionCode}', [DivisionConfigController::class, 'upsert']);
+        });
+
+        // Omzet, target, laporan & budgeting — scope divisi diperiksa dua lapis:
+        // ScopeMiddleware untuk divisionCode eksplisit + DivisionScope pada model.
+        Route::middleware(['scope'])->group(function () {
+            Route::middleware(['capability:view:report'])->group(function () {
+                Route::get('revenue/daily', [RevenueController::class, 'daily']);
+                Route::get('revenue/mtd', [RevenueController::class, 'mtd']);
+                Route::get('revenue/tenants', [RevenueController::class, 'tenants']);
+
+                Route::get('targets/current-month', [TargetController::class, 'currentMonth']);
+                Route::get('targets/run-rate', [TargetController::class, 'runRate']);
+
+                Route::get('reports/transactions', [ReportController::class, 'transactions']);
+                Route::get('reports/reconciliation', [ReportController::class, 'reconciliation']);
+
+                Route::get('budgeting/cashflow', [BudgetingController::class, 'cashflow']);
+                Route::get('budgeting/pnl', [BudgetingController::class, 'pnl']);
+            });
+
+            Route::middleware(['capability:write:revenue'])->group(function () {
+                Route::post('revenue/daily', [RevenueController::class, 'storeDaily']);
+                Route::post('revenue/batch-upload', [RevenueController::class, 'batchUpload']);
+            });
+
+            // Manager/Admin mengusulkan target...
+            Route::middleware(['capability:write:target'])->group(function () {
+                Route::post('targets/tenant', [TargetController::class, 'storeTenantTarget']);
+            });
+
+            // ...hanya BOD yang memutuskan (segregation of duties).
+            Route::middleware(['capability:approve:target'])->group(function () {
+                Route::post('targets/{id}/approve', [TargetController::class, 'approve']);
+                Route::post('targets/{id}/return', [TargetController::class, 'returnTarget']);
+            });
         });
     });
 });

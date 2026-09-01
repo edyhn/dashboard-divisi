@@ -41,3 +41,7 @@ P0 data integrity. Done when: UAT-REV-03/04 PASS; batch gagal tidak menulis fakt
 ## Agent Log
 
 <!-- Agents append their progress updates here -->
+
+### 2026-09-01 — DIGI-11 (agent Beny)
+
+Atomic post: satu baris invalid membatalkan posting seluruh batch (status VALIDATED, 0 baris masuk fakta). Duplikasi file dicegah lewat checksum SHA-256 → `IDEMPOTENCY_CONFLICT`. Counts total/valid/invalid/posted ada di response, dan setiap batch tercatat di audit.

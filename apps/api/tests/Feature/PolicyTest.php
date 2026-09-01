@@ -23,7 +23,12 @@ class PolicyTest extends TestCase
         // Manager capabilities
         $this->assertTrue($policy->hasCapability($managerUser, 'manage:division'));
         $this->assertTrue($policy->hasCapability($managerUser, 'view:report'));
-        $this->assertFalse($policy->hasCapability($managerUser, 'write:revenue'));
+        // Manager adalah writer domain Revenue (Data Dictionary v0.2 §1.2)
+        $this->assertTrue($policy->hasCapability($managerUser, 'write:revenue'));
+        $this->assertTrue($policy->hasCapability($managerUser, 'write:target'));
+        // Hanya BOD yang boleh memutuskan target (segregation of duties)
+        $this->assertFalse($policy->hasCapability($managerUser, 'approve:target'));
+        $this->assertFalse($policy->hasCapability($adminUser, 'approve:target'));
 
         // Admin capabilities
         $this->assertTrue($policy->hasCapability($adminUser, 'write:revenue'));

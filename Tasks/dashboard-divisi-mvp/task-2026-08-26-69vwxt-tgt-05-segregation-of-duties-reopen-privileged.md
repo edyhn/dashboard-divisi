@@ -40,3 +40,7 @@ P0. Done when: self-approval ditolak; reopen wajib reason+audit. Owner: BE/QA, s
 ## Agent Log
 
 <!-- Agents append their progress updates here -->
+
+### 2026-09-01 — DIGI-11 (agent Beny)
+
+Segregation of duties diterapkan dua lapis: capability `approve:target` hanya dimiliki BOD, dan pengusul tidak bisa memutuskan targetnya sendiri (`APPROVAL_SELF_ACTION_DENIED`). Keduanya punya test.

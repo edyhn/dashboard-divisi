@@ -40,3 +40,7 @@ Done when: BOD tidak mengedit nilai secara langsung. Owner: FE/BE, size M.
 ## Agent Log
 
 <!-- Agents append their progress updates here -->
+
+### 2026-09-01 — DIGI-11 (agent Beny)
+
+Endpoint keputusan BOD tersedia: `POST /targets/{id}/approve` dan `POST /targets/{id}/return` (catatan wajib saat return), keduanya menulis `target_approvals` + audit. Review queue UI belum dikerjakan.

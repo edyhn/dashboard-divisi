@@ -40,3 +40,7 @@ Done when: tanggal/outlet/angka/duplikasi menghasilkan row+column error dgn sara
 ## Agent Log
 
 <!-- Agents append their progress updates here -->
+
+### 2026-09-01 — DIGI-11 (agent Beny)
+
+Validasi per baris dengan kode error terstruktur (`OUTLET_NOT_IN_SCOPE`, `INVALID_DATE`, `INVALID_AMOUNT`, `GT_GROSS`) disimpan di `revenue_staging_rows.errors` dan dikembalikan pada response `POST /revenue/batch-upload`. Bagian UI preview/laporan error belum dikerjakan.

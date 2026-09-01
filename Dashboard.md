@@ -31,6 +31,7 @@ Titik masuk utama untuk histori & progres semua pekerjaan yang dicatat via Obsid
 - **2026-08-27** — **Fase 0 selesai penuh**: `FND-04` web shell, `FND-05` Prisma/PostgreSQL + seed 7 divisi, `FND-06` auth/session/logout/reset, `FND-07` policy/scope server-side, `FND-08` audit append-only, `FND-09` test harness anonim, `FND-10` CI quality gate + migration dry-run. Semua gate lokal hijau.
 - **2026-08-27** — **Fase 1 BOD MVP selesai**: `ORG-01` config divisi/outlet tanpa deploy, `ORG-02` EmployeeAssignment historis no-overlap, `ORG-03` UserScope 17 akun, `ORG-04` read model scope server, `ORG-05` filter state di URL, `ORG-06` menu/route guard per capability, `BOD-01` executive read model + KPI compatibility, `BOD-02` executive overview source/period/freshness/drill-down, `BOD-05` config-driven module/KPI per divisi. Next sprint: Manager/Admin scoped flow (`REV-*`, `DASH-*`).
 - **2026-09-01** — **DIGI-10 SELESAI**: Migrasi backend `apps/api` ke **Laravel 13 + PostgreSQL**; skema database, migrasi, seeder 7 divisi + 7 outlet + 17 akun, middleware trace ID & API envelope, otorisasi kapabilitas & scope divisi, audit log append-only tersanitasi, serta 31 automated tests (175 assertions) hijau.
+- **2026-09-01** — **DIGI-11 SELESAI (backend)**: 7 modul API baru di `apps/api` — omzet harian & MTD (+WoW), target bulan ini & run-rate (target harian sisa), rincian omzet tenant, laporan transaksi per metode bayar & rekonsiliasi kasir vs rekening, input/batch-upload omzet append-only (superseded version), workflow target draft→submit→approve/return dengan segregation of duties, serta budgeting Cashflow & PNL. 14 endpoint, 3 migration (revenue/target/budgeting), `DivisionScope` global Eloquent anti-IDOR, pembaca `.xlsx` tanpa dependensi baru. Test 74 hijau (335 assertions; +43 test baru). `apps/web` tidak disentuh sesuai instruksi.
 
 ## Keputusan Penting
 
@@ -42,6 +43,7 @@ Titik masuk utama untuk histori & progres semua pekerjaan yang dicatat via Obsid
 - **2026-08-24** — Tooling: pnpm workspaces 11.x. Struktur dipisah per keputusan owner: apps/web (frontend), apps/api (backend), packages/db (Prisma — deviasi dari ARD §15.1 yang menaruh prisma di dalam api), packages/contracts (tipe bersama), scripts/, Documents/.
 - **2026-08-24** — Lokasi repo wajib di filesystem NTFS. exFAT tidak mendukung symlink/hardlink sehingga pnpm tidak berfungsi normal.
 - **2026-08-24** — Inkonsistensi status antar-dokumen (impor/rekonsiliasi/penilaian) mengikuti Data Dictionary v0.2 + API Contract v0.1 sebagai baseline teknis; deviasi PRD dicatat, tidak diam-diam dipilih.
+- **2026-09-01** — **Kontrak endpoint DIGI-11**: path mengikuti instruksi issue (mis. `POST /revenue/batch-upload`, `POST /targets/tenant`) sementara semantik tetap Data Dictionary v0.2 + API Contract v0.1; uang dikirim sebagai decimal string; Cashflow/PNL memakai satu tabel `budget_entries` dengan Net Revenue selalu diturunkan dari `revenue_daily`; MANAGER mendapat `write:revenue`, hanya BOD yang punya `approve:target`. Detail & utangnya: `Decisions/2026-09-01-kontrak-endpoint-omset-target-budgeting.md`.
 
 ## Cara Kerja Histori
 

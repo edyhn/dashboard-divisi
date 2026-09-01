@@ -42,3 +42,7 @@ Done when: original row tersimpan di staging; parser tidak menulis domain langsu
 ## Agent Log
 
 <!-- Agents append their progress updates here -->
+
+### 2026-09-01 — DIGI-11 (agent Beny)
+
+Parser Excel dibuat tanpa dependensi baru: `App\Services\XlsxReader` (ZipArchive + SimpleXML) + mapping header kanonik (ID/EN) di `RevenueService::COLUMN_ALIASES`. Version marker template masih menunggu REV-01 (keputusan bisnis).

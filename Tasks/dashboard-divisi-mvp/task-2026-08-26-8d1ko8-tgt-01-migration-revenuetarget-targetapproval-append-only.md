@@ -1,12 +1,12 @@
 ---
 id: task-2026-08-26-8d1ko8
 title: '[TGT-01] Migration RevenueTarget & TargetApproval append-only'
-status: blocked
+status: done
 priority: high
 type: other
 assignee: ''
 created: '2026-08-26T05:04:01.560Z'
-updated: '2026-08-26T05:04:01.560Z'
+updated: '2026-09-01T00:00:00.000Z'
 retry_count: 0
 source: manual
 project: proj-2026-08-26-p06j8t
@@ -35,8 +35,12 @@ Done when: unique outlet+period+metric+version dan actor relation valid; append-
 
 ## Acceptance Criteria
 
-- [ ] Unique outlet+period+metric+version
+- [x] Unique outlet+period+metric+version
 
 ## Agent Log
 
 <!-- Agents append their progress updates here -->
+
+### 2026-09-01 — DIGI-11 (agent Beny)
+
+Migration `revenue_targets` + `target_approvals` (`2026_09_01_000010_create_target_tables.php`): unique outlet+period+metric+version, approval append-only dengan `occurred_at`, hanya satu target APPROVED aktif per outlet/periode/metrik (versi lama otomatis SUPERSEDED saat approve).
