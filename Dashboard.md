@@ -46,6 +46,7 @@ Titik masuk utama untuk histori & progres semua pekerjaan yang dicatat via Obsid
 - **2026-09-01** — **OrgFilters real BE**: `hooks/useOrg.ts:20` `GET /org/divisions & /org/outlets?divisionCode` + `placeholderData` 7 divisi/2 outlet, `OrgFilters.tsx:36` BE real fallback `DIVISIONS`, hilangkan `getMockOutlets` di filter. `OrgFilters.test` `QueryClientProvider` retry:false. Gate `lint 0/typecheck 0/build 9.20s` `29/29` `74/74` hijau; commit `88ecfdc`.
 - **2026-09-01** — **Polish sisa pre JSON**: `WorkforcePage:32` `pre`→pill cards divisi/outlet + scope, `OmzetPage:61` `pre`→tabel daily 10 baris `Tanggal/Outlet/Nominal`. Gate `lint 0/typecheck 0/build 4.18s` `29/29` `74/74` hijau; commit `48f265b`.
 - **2026-09-01** — **Hybrid RoleSwitcher + period wiring**: `RoleSwitcher:6` dev-only + pill Demo preview + `handleRoleChange` sync `SessionContext` + `authApi.login` seed + `refresh`, `divisions.ts:30` `@deprecated getMockOutlets`, `useBodOverview:7` sudah `?from&to` via `OrgFilters`. Gate `lint 0/typecheck 0/build 9.80s` `29/29` `74/74` hijau; commit `cf14054`.
+- **2026-09-01** — **Kluster A polish**: `KonfigurasiPage:12` `outletQ` `GET /org/outlets` scoped tabel 20 baris, `KaryawanPage:40` `UNMAPPED` `EmptyState` + guard `HR-01`, `Decisions/2026-09-01-polish-orgfilters-workforce-omzet-roleSwitcher.md`. Gate `lint 0/typecheck 0/build 5.17s` `29/29` `74/74` hijau; commit `a83bfdd`.
 
 ## Keputusan Penting
 
