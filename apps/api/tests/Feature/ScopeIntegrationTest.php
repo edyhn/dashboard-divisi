@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Exceptions\ApiException;
 use App\Services\AuditService;
 use App\Services\PolicyService;
 use Tests\TestCase;
@@ -55,7 +56,7 @@ class ScopeIntegrationTest extends TestCase
         $policy = app(PolicyService::class);
         $managerWrap = ['id' => 'u1', 'sub' => 'u1', 'email' => 'manager.wrap@dashboard.test', 'role' => 'MANAGER', 'divisionCode' => 'WRAP'];
 
-        $this->expectException(\App\Exceptions\ApiException::class);
+        $this->expectException(ApiException::class);
         $this->expectExceptionMessage('Akses ditolak untuk divisi CELL');
 
         try {

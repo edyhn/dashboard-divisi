@@ -6,7 +6,6 @@ use App\Exceptions\ApiException;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use Throwable;
 
 class AuthService
 {
@@ -94,13 +93,13 @@ class AuthService
     public function validateUser(string $email, string $password): array
     {
         $user = $this->findUserByEmail($email);
-        if (!$user || !$user['is_active']) {
+        if (! $user || ! $user['is_active']) {
             throw new ApiException('AUTH_REQUIRED', 'Email atau password salah');
         }
 
         $ok = Hash::check($password, $user['password_hash']) || password_verify($password, $user['password_hash']);
 
-        if (!$ok) {
+        if (! $ok) {
             throw new ApiException('AUTH_REQUIRED', 'Email atau password salah');
         }
 
@@ -147,7 +146,7 @@ class AuthService
 
     public function logout(array $userPayload): array
     {
-        if (!empty($userPayload['jti'])) {
+        if (! empty($userPayload['jti'])) {
             $this->tokenRevocation->revoke($userPayload['jti']);
         }
 
@@ -168,7 +167,7 @@ class AuthService
     {
         $userId = $userPayload['sub'] ?? '';
         $user = $this->findUserById($userId);
-        if (!$user || !$user['is_active']) {
+        if (! $user || ! $user['is_active']) {
             throw new ApiException('AUTH_REQUIRED', 'Sesi tidak valid');
         }
 
@@ -188,13 +187,13 @@ class AuthService
         }
 
         $user = $this->findUserById($userId);
-        if (!$user) {
+        if (! $user) {
             throw new ApiException('AUTH_REQUIRED', 'User tidak ditemukan');
         }
 
         $ok = Hash::check($oldPassword, $user['password_hash']) || password_verify($oldPassword, $user['password_hash']);
 
-        if (!$ok) {
+        if (! $ok) {
             throw new ApiException('AUTH_REQUIRED', 'Password lama salah');
         }
 

@@ -10,7 +10,9 @@ use Throwable;
 class JwtService
 {
     protected string $secret;
+
     protected string $algo = 'HS256';
+
     public const DEFAULT_TTL_SECONDS = 28800; // 8 jam — SOP: no magic number
 
     public function __construct()
@@ -41,6 +43,7 @@ class JwtService
     {
         try {
             $decoded = JWT::decode($token, new Key($this->secret, $this->algo));
+
             return (array) $decoded;
         } catch (Throwable $e) {
             throw new ApiException('AUTH_REQUIRED', 'Token tidak valid atau kadaluarsa');

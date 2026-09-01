@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\DivisionConfig;
+
 class KpiCompatibility
 {
     /**
@@ -70,7 +72,7 @@ class KpiCompatibility
             }
         }
 
-        if (!$kpiA || !$kpiB) {
+        if (! $kpiA || ! $kpiB) {
             return false;
         }
 
@@ -80,7 +82,7 @@ class KpiCompatibility
     private static function resolveKpiMap(): array
     {
         try {
-            $configs = \App\Models\DivisionConfig::with('division')->get();
+            $configs = DivisionConfig::with('division')->get();
             if ($configs->isNotEmpty()) {
                 $map = [];
                 foreach ($configs as $c) {
@@ -90,17 +92,22 @@ class KpiCompatibility
                     foreach ($c->enabled_kpis ?? [] as $kpiCode) {
                         $def = null;
                         foreach (self::DIVISION_KPIS[$code] ?? [] as $dk) {
-                            if ($dk['code'] === $kpiCode) { $def = $dk; break; }
+                            if ($dk['code'] === $kpiCode) {
+                                $def = $dk;
+                                break;
+                            }
                         }
                         $kpis[] = $def ?? ['code' => $kpiCode, 'level' => 'division', 'unit' => 'mixed', 'formula' => 'custom', 'version' => 'v1'];
                     }
                     $map[$code] = $kpis;
                 }
+
                 return $map;
             }
         } catch (\Throwable) {
             // fallback ke default saat DB belum siap (migrasi/testing)
         }
+
         return self::DIVISION_KPIS;
     }
 
@@ -151,6 +158,7 @@ class KpiCompatibility
                     return true;
                 }
             }
+
             return false;
         }));
     }

@@ -23,7 +23,9 @@ class ApiException extends Exception
     ];
 
     protected string $errorCode;
+
     protected int $httpStatus;
+
     protected ?array $fields;
 
     public function __construct(string $errorCode, string $message = '', ?array $fields = null)

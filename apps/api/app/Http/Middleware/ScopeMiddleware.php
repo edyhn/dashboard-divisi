@@ -17,7 +17,7 @@ class ScopeMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->attributes->get('user');
-        if (!$user) {
+        if (! $user) {
             throw new ApiException('AUTH_REQUIRED', 'Autentikasi diperlukan');
         }
 

@@ -2,8 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
@@ -84,14 +82,14 @@ class AuthTest extends TestCase
     {
         $token = $this->getJwtTokenForUser('bod1@dashboard.test');
 
-        $logoutRes = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $logoutRes = $this->withHeader('Authorization', 'Bearer '.$token)
             ->postJson('/api/v1/auth/logout');
 
         $logoutRes->assertStatus(200);
         $this->assertEquals('Logout berhasil', $logoutRes->json('data.message'));
 
         // Subsequent access with revoked token should fail with 401
-        $meRes = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $meRes = $this->withHeader('Authorization', 'Bearer '.$token)
             ->getJson('/api/v1/auth/me');
 
         $meRes->assertStatus(401);
@@ -104,7 +102,7 @@ class AuthTest extends TestCase
         $token = $this->getJwtTokenForUser('bod2@dashboard.test');
 
         // Short password fails with 400 VALIDATION_ERROR
-        $shortRes = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $shortRes = $this->withHeader('Authorization', 'Bearer '.$token)
             ->postJson('/api/v1/auth/reset', [
                 'oldPassword' => 'Password123!',
                 'newPassword' => 'short',
@@ -113,7 +111,7 @@ class AuthTest extends TestCase
         $this->assertEquals('VALIDATION_ERROR', $shortRes->json('error.code'));
 
         // Wrong old password fails with 401 AUTH_REQUIRED
-        $wrongOld = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $wrongOld = $this->withHeader('Authorization', 'Bearer '.$token)
             ->postJson('/api/v1/auth/reset', [
                 'oldPassword' => 'WrongOldPassword',
                 'newPassword' => 'NewValidPassword123!',
@@ -122,7 +120,7 @@ class AuthTest extends TestCase
         $this->assertEquals('AUTH_REQUIRED', $wrongOld->json('error.code'));
 
         // Valid reset succeeds
-        $success = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $success = $this->withHeader('Authorization', 'Bearer '.$token)
             ->postJson('/api/v1/auth/reset', [
                 'oldPassword' => 'Password123!',
                 'newPassword' => 'NewValidPassword123!',

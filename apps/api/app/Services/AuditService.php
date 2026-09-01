@@ -43,7 +43,10 @@ class AuditService
             $lowerKey = strtolower((string) $key);
             $isSensitive = false;
             foreach (self::SENSITIVE_KEYS as $s) {
-                if (str_contains($lowerKey, $s)) { $isSensitive = true; break; }
+                if (str_contains($lowerKey, $s)) {
+                    $isSensitive = true;
+                    break;
+                }
             }
             if ($isSensitive) {
                 continue;
@@ -51,7 +54,7 @@ class AuditService
 
             if (is_array($val)) {
                 $sanitized = $this->sanitizeMetadata($val);
-                if (!empty($sanitized)) {
+                if (! empty($sanitized)) {
                     $out[$key] = $sanitized;
                 }
             } else {
@@ -59,7 +62,7 @@ class AuditService
             }
         }
 
-        return !empty($out) ? $out : null;
+        return ! empty($out) ? $out : null;
     }
 
     public function log(array $params): void

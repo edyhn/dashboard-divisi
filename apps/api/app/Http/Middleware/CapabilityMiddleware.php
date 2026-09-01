@@ -17,7 +17,7 @@ class CapabilityMiddleware
     public function handle(Request $request, Closure $next, string $capability): Response
     {
         $user = $request->attributes->get('user');
-        if (!$user) {
+        if (! $user) {
             throw new ApiException('AUTH_REQUIRED', 'Autentikasi diperlukan');
         }
 

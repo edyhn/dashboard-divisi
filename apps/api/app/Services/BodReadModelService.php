@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Division;
-use Throwable;
 
 class BodReadModelService
 {

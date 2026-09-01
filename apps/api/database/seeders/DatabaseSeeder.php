@@ -108,7 +108,7 @@ class DatabaseSeeder extends Seeder
 
         // 4. Seed UserScopes (14 users: Manager & Admin)
         foreach (self::USERS as $u) {
-            if (!$u['division_code']) {
+            if (! $u['division_code']) {
                 continue;
             }
             $user = $userMap[$u['email']];
