@@ -1,6 +1,7 @@
 import { useSearchParams } from 'react-router-dom';
 
-import { DIVISIONS, getMockOutlets } from '../../config/divisions';
+import { DIVISIONS } from '../../config/divisions';
+import { useOrgDivisions, useOrgOutlets } from '../../hooks/useOrg';
 
 export function useOrgFilters() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -32,6 +33,11 @@ export function useOrgFilters() {
 
 export function OrgFilters() {
   const { periodFrom, periodTo, divisionCode, outletCode, setFilter, clearAll } = useOrgFilters();
+  const divisionsQ = useOrgDivisions();
+  const outletsQ = useOrgOutlets(divisionCode || undefined);
+  // BE real → fallback DIVISIONS statis; outlet real → fallback mock 2 outlet per divisi (placeholderData)
+  const divisions = divisionsQ.data ?? DIVISIONS.map((d, i) => ({ code: d.code, name: d.name, isActive: true, sortOrder: i }));
+  const outlets = outletsQ.data ?? [];
 
   return (
     <div className="grid gap-3 p-4 rounded-card-lg border border-line/60 bg-white shadow-card lg:grid-cols-[1fr_1fr_1fr_1fr_auto] lg:items-end">
@@ -67,7 +73,7 @@ export function OrgFilters() {
           data-testid="filter-division"
         >
           <option value="">Semua (BOD)</option>
-          {DIVISIONS.map((d) => (
+          {divisions.map((d) => (
             <option key={d.code} value={d.code}>
               {d.name}
             </option>
@@ -84,7 +90,11 @@ export function OrgFilters() {
           disabled={!divisionCode}
         >
           <option value="">Semua</option>
-          {divisionCode && getMockOutlets(divisionCode).map((code) => <option key={code} value={code}>{code}</option>)}
+          {outlets.map((o) => (
+            <option key={o.code} value={o.code}>
+              {o.code}
+            </option>
+          ))}
         </select>
       </label>
       <button onClick={clearAll} className="h-[38px] rounded-input border border-line bg-white px-4 py-2 text-sm font-medium text-navy hover:bg-surface transition-colors" data-testid="filter-clear">
