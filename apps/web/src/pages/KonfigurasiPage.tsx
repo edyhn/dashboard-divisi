@@ -1,21 +1,25 @@
 import { useState } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { bodApi } from '../api/bod';
+import { useMutation } from '@tanstack/react-query';
 import { api } from '../api/client';
+import { useDivisionConfigs, useOutlets } from '../hooks/useBod';
+import { useToast } from '../components/ui/Toast';
 import { EmptyState, ErrorState, LoadingState } from '../components/states';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { useToast } from '../components/ui/Toast';
 import { StatusPill } from '../components/StatusPill';
 
 export default function KonfigurasiPage() {
-  const { data, isLoading, error, refetch } = useQuery({ queryKey:['division-configs'], queryFn:()=> bodApi.divisionConfigs().then(r=>r.data)});
-  const outletQ = useQuery({ queryKey:['org','outlets','konfigurasi', 'all'], queryFn:()=> import('../api/org').then(m=>m.orgApi.outlets().then(r=>r.data))});
+  const { data, isLoading, error, refetch } = useDivisionConfigs();
+  const outletQ = useOutlets();
   const { toast } = useToast();
   const [code, setCode] = useState('WRAP');
   const [modules, setModules] = useState('dashboard,revenue');
   const [kpis, setKpis] = useState('revenue.gross');
-  const mut = useMutation({ mutationFn: ()=> api.post<unknown>(`/division-configs/${code}`, { enabledModules: modules.split(',').map(s=>s.trim()).filter(Boolean), enabledKpis: kpis.split(',').map(s=>s.trim()).filter(Boolean) }).then(r=>r.data), onSuccess:()=>{toast('Config disimpan', 'success'); void refetch();}, onError:()=>{const err = mut.error as unknown as { message?: string; traceId?: string }; toast(`${err.message ?? 'Gagal simpan'}${err.traceId ? ` — ${err.traceId}` : ''}`, 'error'); } });
+  const mut = useMutation({
+    mutationFn: () => api.post<unknown>(`/division-configs/${code}`, { enabledModules: modules.split(',').map(s => s.trim()).filter(Boolean), enabledKpis: kpis.split(',').map(s => s.trim()).filter(Boolean) }).then((r) => r.data),
+    onSuccess: () => { toast('Config disimpan', 'success'); void refetch(); },
+    onError: () => { const err = mut.error as unknown as { message?: string; traceId?: string }; toast(`${err.message ?? 'Gagal simpan'}${err.traceId ? ` — ${err.traceId}` : ''}`, 'error'); }
+  });
 
   if (isLoading) return <LoadingState />;
   if (error) return <ErrorState description={(error as Error).message} onRetry={()=>void refetch()} />;

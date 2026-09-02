@@ -24,7 +24,15 @@ const TargetPage = lazy(() => import('./pages/TargetPage'));
 const WorkforcePage = lazy(() => import('./pages/WorkforcePage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 menit — anti refetch storm
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 function HomeRedirect() {
   const { user, loading } = useAuth();

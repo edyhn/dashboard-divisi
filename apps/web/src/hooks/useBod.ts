@@ -11,22 +11,23 @@ export function useBodOverview() {
     queryKey: ['bod', 'overview', periodFrom, periodTo, user?.id],
     queryFn: () => bodApi.overview(periodFrom || undefined, periodTo || undefined).then((r) => r.data),
     enabled: !loading && !!user,
+    staleTime: 5 * 60 * 1000,
   });
 }
 
 export function useExecutiveReadModel() {
   const { user, loading } = useAuth();
-  return useQuery({ queryKey: ['bod', 'executive', user?.id], queryFn: () => bodApi.executive().then((r) => r.data), enabled: !loading && !!user });
+  return useQuery({ queryKey: ['bod', 'executive', user?.id], queryFn: () => bodApi.executive().then((r) => r.data), enabled: !loading && !!user, staleTime: 5 * 60 * 1000 });
 }
 
 export function useDivisionConfigs() {
   const { user, loading } = useAuth();
-  return useQuery({ queryKey: ['division-configs', user?.id], queryFn: () => bodApi.divisionConfigs().then((r) => r.data), enabled: !loading && !!user });
+  return useQuery({ queryKey: ['division-configs', user?.id], queryFn: () => bodApi.divisionConfigs().then((r) => r.data), enabled: !loading && !!user, staleTime: 5 * 60 * 1000 });
 }
 
 export function useOrgContext() {
   const { user, loading } = useAuth();
-  return useQuery({ queryKey: ['org', 'context', user?.id], queryFn: () => orgApi.context().then((r) => r.data), enabled: !loading && !!user });
+  return useQuery({ queryKey: ['org', 'context', user?.id], queryFn: () => orgApi.context().then((r) => r.data), enabled: !loading && !!user, staleTime: 2 * 60 * 1000 });
 }
 
 export function useDivisions() {

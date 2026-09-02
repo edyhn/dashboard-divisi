@@ -4,11 +4,11 @@ import { useAuth } from '../session/AuthContext';
 
 export function useTargetsCurrent(params?: Record<string, string | undefined>) {
   const { user, loading } = useAuth();
-  return useQuery({ queryKey: ['targets', 'current', params, user?.id], queryFn: () => targetsApi.currentMonth(params).then((r) => r.data), enabled: !loading && !!user });
+  return useQuery({ queryKey: ['targets', 'current', params, user?.id], queryFn: () => targetsApi.currentMonth(params).then((r) => r.data), enabled: !loading && !!user, staleTime: 2 * 60 * 1000 });
 }
 export function useTargetsRunRate(params?: Record<string, string | undefined>) {
   const { user, loading } = useAuth();
-  return useQuery({ queryKey: ['targets', 'runRate', params, user?.id], queryFn: () => targetsApi.runRate(params).then((r) => r.data), enabled: !loading && !!user });
+  return useQuery({ queryKey: ['targets', 'runRate', params, user?.id], queryFn: () => targetsApi.runRate(params).then((r) => r.data), enabled: !loading && !!user, staleTime: 2 * 60 * 1000 });
 }
 export function useUpsertTarget() {
   const qc = useQueryClient();

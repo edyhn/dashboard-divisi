@@ -1,10 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
-import { orgApi } from '../api/org';
+import { useOrgContext } from '../hooks/useBod';
 import { EmptyState, ErrorState, LoadingState } from '../components/states';
 import { useToast } from '../components/ui/Toast';
 
 export default function WorkforcePage() {
-  const ctx = useQuery({ queryKey:['org','context'], queryFn:()=>orgApi.context().then(r=>r.data)});
+  const ctx = useOrgContext();
   const { toast } = useToast();
   if (ctx.isLoading) return <LoadingState />;
   if (ctx.error) {
