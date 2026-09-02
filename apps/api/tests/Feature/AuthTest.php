@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Services\JwtService;
+use App\Services\TokenRevocationService;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
@@ -152,5 +154,25 @@ class AuthTest extends TestCase
         ]);
 
         $blocked->assertStatus(429);
+    }
+
+    public function test_revoked_token_is_persisted_and_survives_cache_clear(): void
+    {
+        $token = $this->getJwtTokenForUser('bod3@dashboard.test');
+
+        $logout = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/v1/auth/logout');
+        $logout->assertStatus(200);
+
+        // Simulasi restart multi-proses: buang cache static, hanya andalkan DB
+        TokenRevocationService::clear();
+
+        $revocation = app(TokenRevocationService::class);
+        $decoded = app(JwtService::class)->verify($token);
+        $this->assertNotEmpty($decoded['jti'] ?? null);
+        $this->assertTrue($revocation->isRevoked($decoded['jti']));
+
+        // Pastikan tercatat di DB juga
+        $this->assertDatabaseHas('revoked_tokens', ['token_id' => $decoded['jti']]);
     }
 }

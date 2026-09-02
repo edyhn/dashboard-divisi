@@ -147,7 +147,10 @@ class AuthService
     public function logout(array $userPayload): array
     {
         if (! empty($userPayload['jti'])) {
-            $this->tokenRevocation->revoke($userPayload['jti']);
+            $expiresAt = isset($userPayload['exp'])
+                ? (new \DateTimeImmutable)->setTimestamp((int) $userPayload['exp'])
+                : null;
+            $this->tokenRevocation->revoke($userPayload['jti'], $userPayload['sub'] ?? null, $expiresAt);
         }
 
         $this->audit->log([
