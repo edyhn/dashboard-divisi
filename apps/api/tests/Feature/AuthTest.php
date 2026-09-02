@@ -135,4 +135,22 @@ class AuthTest extends TestCase
         ]);
         $loginRes->assertStatus(200);
     }
+
+    public function test_login_is_rate_limited_after_exceeding_attempts(): void
+    {
+        // throttle:6,1 — setelah 6 percobaan, percobaan ke-7 ditolak 429 (anti brute-force)
+        for ($i = 0; $i < 6; $i++) {
+            $this->postJson('/api/v1/auth/login', [
+                'email' => 'bod1@dashboard.test',
+                'password' => 'WrongPassword',
+            ]);
+        }
+
+        $blocked = $this->postJson('/api/v1/auth/login', [
+            'email' => 'bod1@dashboard.test',
+            'password' => 'WrongPassword',
+        ]);
+
+        $blocked->assertStatus(429);
+    }
 }

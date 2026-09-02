@@ -15,15 +15,15 @@ Route::prefix('v1')->group(function () {
     // Health check (public)
     Route::get('health', [HealthController::class, 'check']);
 
-    // Auth public
-    Route::post('auth/login', [AuthController::class, 'login']);
+    // Auth public — rate limit 6/menit/IP (anti brute-force)
+    Route::post('auth/login', [AuthController::class, 'login'])->middleware('throttle:6,1');
 
     // Protected routes requiring JWT authentication
     Route::middleware(['jwt.auth'])->group(function () {
         // Auth session
         Route::post('auth/logout', [AuthController::class, 'logout']);
         Route::get('auth/me', [AuthController::class, 'me']);
-        Route::post('auth/reset', [AuthController::class, 'reset']);
+        Route::post('auth/reset', [AuthController::class, 'reset'])->middleware('throttle:6,1');
 
         // Org read models
         Route::get('org/divisions', [OrgController::class, 'divisions']);
