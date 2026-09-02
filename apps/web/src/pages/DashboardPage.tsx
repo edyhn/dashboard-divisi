@@ -53,12 +53,12 @@ export default function DashboardPage() {
       <section className="rounded-card-lg border border-line/60 bg-gradient-to-br from-white to-surface p-6 shadow-card">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <div className="inline-flex items-center gap2 rounded-pill bg-primary px3 py1 text-xs font-medium text-white">● Real BE</div>
-            <h1 className="mt2 text-2xl lg:text-3xl font-bold tracking-tight text-navy">Ringkasan performa operasional</h1>
-            <p className="mt-2 text-sm text-slate-500">{formatScope(user?.role, user?.divisionCode)} · periode berjalan · <span className="font-mono text-xs bg-surface px1.5 py0.5 rounded">trace_id</span> envelope</p>
+            <div className="inline-flex items-center gap-2 rounded-pill bg-primary px-3 py-1 text-xs font-medium text-white">● Real BE</div>
+            <h1 className="mt-2 text-2xl lg:text-3xl font-bold tracking-tight text-navy">Ringkasan performa operasional</h1>
+            <p className="mt-2 text-sm text-slate-500">{formatScope(user?.role, user?.divisionCode)} · periode berjalan · <span className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded">trace_id</span> envelope</p>
           </div>
-          <div className="flex items-center gap2 rounded-card-lg bg-success-light border border-success/20 px4 py3 text-sm">
-            <div className="h2 w2 rounded-full bg-success animate-pulse" />
+          <div className="flex items-center gap-2 rounded-card-lg bg-success-light border border-success/20 px-4 py-3 text-sm">
+            <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
             <span className="font-medium text-success">Sinkron real-time</span>
             <span className="text-success/70">· {filtered.length} divisi</span>
           </div>
@@ -72,8 +72,8 @@ export default function DashboardPage() {
           return (
             <article key={m.label} className="group rounded-card-lg border border-line/60 bg-white p-5 shadow-card hover:shadow-card-hover hover:-translate-y-0.5 transition-all">
               <div className="flex items-start justify-between">
-                <div className={`flex h10 w10 items-center justify-center rounded-card-lg ${m.bg} ${m.color}`}><Icon className="h5 w5" /></div>
-                <ArrowUpRight className="h4 w4 text-slate-300 group-hover:text-slate-400 transition-colors" />
+                <div className={`flex h-10 w-10 items-center justify-center rounded-card-lg ${m.bg} ${m.color}`}><Icon className="h-5 w-5" /></div>
+                <ArrowUpRight className="h-4 w-4 text-slate-300 group-hover:text-slate-400 transition-colors" />
               </div>
               <p className="mt-4 text-sm font-medium text-slate-500">{m.label}</p>
               <p className="mt-1 text-2xl lg:text-3xl font-bold tracking-tight text-navy">{m.value}</p>
@@ -91,10 +91,10 @@ export default function DashboardPage() {
             <div key={d.divisionCode} className="rounded-card-lg border border-line/60 p-4 hover:bg-surface/50 transition-colors">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold text-navy">{d.divisionCode}</p>
-                <span className="h2 w2 rounded-full bg-success/60" />
+                <span className="h-2 w-2 rounded-full bg-success/60" />
               </div>
               <p className="mt-1 text-xs font-mono text-slate-500">{d.revenue.source}</p>
-              <p className="mt1 text-xs text-slate-400">{new Date(d.revenue.freshness).toLocaleDateString('id-ID')}</p>
+              <p className="mt-1 text-xs text-slate-400">{new Date(d.revenue.freshness).toLocaleDateString('id-ID')}</p>
             </div>
           ))}
         </div>
@@ -127,7 +127,7 @@ export default function DashboardPage() {
             </div>
             <div className="rounded-card-lg border border-line/60 p-4">
               <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Freshness</p>
-              <p className="mt-1 text-sm font-semibold text-success flex items-center gap1.5"><span className="h2 w2 rounded-full bg-success animate-pulse" />BOD overview real</p>
+              <p className="mt-1 text-sm font-semibold text-success flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-success animate-pulse" />BOD overview real</p>
             </div>
           </div>
         </article>

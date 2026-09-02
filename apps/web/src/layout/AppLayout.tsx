@@ -174,7 +174,7 @@ export function AppLayout() {
             </div>
             <div className="rounded-card-lg border border-line/60 bg-gradient-to-br from-success-light to-white p-4 shadow-card">
               <p className="text-xs font-medium uppercase tracking-wider text-success">Freshness</p>
-              <p className="mt-1 text-sm font-semibold text-success flex items-center gap1.5">
+              <p className="mt-1 text-sm font-semibold text-success flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
                 Sinkron real-time
               </p>

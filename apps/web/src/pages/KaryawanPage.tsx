@@ -22,7 +22,7 @@ export default function KaryawanPage() {
         <p className="mt-2 text-sm text-slate-500">Real BE — /org/assignments (scoped). Privacy guard: tanpa payroll nominal.</p>
       </section>
       <section className="rounded-card-lg border border-line bg-white p-5 shadow-card hover:shadow-card-hover transition-shadow">
-        <h2 className="text-lg font-semibold text-navy">{list.length===0 ? 'Assignment historis' : 'Assignment historis'}</h2>
+        <h2 className="text-lg font-semibold text-navy">Assignment historis</h2>
         <p className="text-xs text-slate-400">Payroll detail tidak tampil</p>
          {list.length===0 ? <EmptyState title="Belum ada assignment" description="Data assignment kosong — seed atau buat via BE." action={<a href="/konfigurasi" className="mt-3 inline-flex rounded-input bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark">Buka konfigurasi</a>} /> : (
           <>
