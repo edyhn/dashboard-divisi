@@ -20,7 +20,8 @@ class JwtService
         $secret = (string) (env('JWT_SECRET') ?: config('app.key') ?: '');
         if ($secret === '') {
             if (app()->environment('testing')) {
-                $secret = 'test-jwt-secret-min-32-karakter-untuk-ci-1234567890';
+                // SOP: Zero Hardcoded Secrets — secret per-proses acak, bukan konstanta publik.
+                $secret = (string) bin2hex(random_bytes(32));
             } else {
                 throw new \RuntimeException('JWT_SECRET / APP_KEY belum dikonfigurasi — set di .env (SOP: Zero Hardcoded Secrets)');
             }
