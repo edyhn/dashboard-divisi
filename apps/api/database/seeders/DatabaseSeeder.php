@@ -57,7 +57,13 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
-        $defaultPassword = env('SEED_DEFAULT_PASSWORD', 'Password123!');
+        // SOP: Zero Hardcoded Secrets — default password hanya dibolehkan untuk testing.
+        // Non-testing WAJIB menyetel SEED_DEFAULT_PASSWORD eksplisit; tanpa itu seeder gagal keras
+        // (mencegah akun produksi memakai password publik yang sudah diketahui).
+        $defaultPassword = env('SEED_DEFAULT_PASSWORD', app()->environment('testing') ? 'Password123!' : null);
+        if ($defaultPassword === null || $defaultPassword === '') {
+            throw new \RuntimeException('SEED_DEFAULT_PASSWORD wajib disetel di lingkungan non-testing (SOP: Zero Hardcoded Secrets).');
+        }
         $passwordHash = Hash::make($defaultPassword, ['rounds' => 10]);
 
         // 1. Seed Divisions

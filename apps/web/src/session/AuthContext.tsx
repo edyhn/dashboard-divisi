@@ -44,52 +44,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await authApi.me();
       setUser(res.data);
     } catch (e) {
-      // Jika ada role-demo tersimpan (dev/test), coba auto-login real BE dengan kredensial seed agar dapat cookie
-      const storedRole = localStorage.getItem('dashboard-divisi.role-demo');
-      if (storedRole) {
-        try {
-          const { MOCK_SESSIONS, isRole } = await import('../mocks/session');
-          if (isRole(storedRole)) {
-            const base = MOCK_SESSIONS[storedRole]!;
-            const div = localStorage.getItem('dashboard-divisi.division-demo') ?? base.divisionCode;
-            // Coba login real BE dengan akun seed (manager.wrap@..., bod1@..., dll)
-            const emailMap: Record<string, string> = {
-              BOD: 'bod1@dashboard.test',
-              SUPERADMIN: 'bod1@dashboard.test',
-              HRD: 'bod1@dashboard.test',
-              USER: 'bod1@dashboard.test',
-            };
-            let email = emailMap[storedRole];
-            if (!email) {
-              // MANAGER / ADMIN → manager.wrap@... / admin.wrap@...
-              const prefix = storedRole.toLowerCase();
-              const divLower = (div ?? 'wrap').toLowerCase();
-              email = `${prefix}.${divLower}@dashboard.test`;
-            }
-            try {
-              await authApi.login(email, 'Password123!');
-              const res2 = await authApi.me();
-              setUser(res2.data);
-              setLoading(false);
-              return;
-            } catch {
-              // Jika BE down atau login gagal, fallback ke mock tanpa token (akan redirect ke /login)
-            }
-            // Fallback mock jika login gagal (agar test tetap jalan)
-            setUser({ id: base!.name, email, name: base!.name, role: base!.role, divisionCode: div } as unknown as AuthUser);
-            setLoading(false);
-            return;
-          }
-        } catch {}
-      }
-      // Test env: jika tanpa BE, fallback ke MANAGER agar test tetap hijau (hanya saat Vitest)
+      // Test env: jika tanpa BE, fallback ke mock sesuai role-demo agar test tetap hijau (hanya saat Vitest).
+      // SOP: Zero Hardcoded Secrets — tidak pernah auto-login ke BE asli dengan kredensial seed.
       if (typeof import.meta !== 'undefined' && (import.meta as unknown as { env?: { MODE?: string } }).env?.MODE === 'test') {
         try {
-          const { MOCK_SESSIONS } = await import('../mocks/session');
-          const base = MOCK_SESSIONS.MANAGER!;
-          setUser({ id: base.name, email: 'manager@dashboard.test', name: base.name, role: base.role, divisionCode: base.divisionCode } as unknown as AuthUser);
-          setLoading(false);
-          return;
+          const { MOCK_SESSIONS, isRole } = await import('../mocks/session');
+          const storedRole = localStorage.getItem('dashboard-divisi.role-demo');
+          const role = storedRole && isRole(storedRole) ? storedRole : 'MANAGER';
+          const base = MOCK_SESSIONS[role]!;
+          const div = localStorage.getItem('dashboard-divisi.division-demo') ?? base.divisionCode;
+          setUser({ id: base.name, email: `${role.toLowerCase()}@dashboard.test`, name: base.name, role: base.role, divisionCode: div } as unknown as AuthUser);
         } catch {}
       }
       if (e instanceof ApiException && e.status === 401) {
