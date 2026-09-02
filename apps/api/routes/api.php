@@ -39,10 +39,13 @@ Route::prefix('v1')->group(function () {
             Route::get('division-configs', [DivisionConfigController::class, 'getAll']);
         });
 
-        Route::get('division-configs/{divisionCode}', [DivisionConfigController::class, 'getOne']);
+        // Division configs — read/write per divisi memakai scope middleware (anti IDOR lintas divisi).
+        Route::middleware(['scope'])->group(function () {
+            Route::get('division-configs/{divisionCode}', [DivisionConfigController::class, 'getOne']);
 
-        Route::middleware(['capability:manage:division'])->group(function () {
-            Route::post('division-configs/{divisionCode}', [DivisionConfigController::class, 'upsert']);
+            Route::middleware(['capability:manage:division'])->group(function () {
+                Route::post('division-configs/{divisionCode}', [DivisionConfigController::class, 'upsert']);
+            });
         });
 
         // Omzet, target, laporan & budgeting — scope divisi diperiksa dua lapis:
