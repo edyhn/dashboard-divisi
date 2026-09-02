@@ -6,9 +6,23 @@ use App\Models\Division;
 
 class BodReadModelService
 {
-    public function getExecutiveReadModel(): array
+    // SOP 4 / anti IDOR: non-BOD hanya melihat divisinya sendiri; BOD lintas 7 divisi.
+    protected function canAccessDivision(array $user, string $divisionCode): bool
     {
-        $divisions = Division::orderBy('sort_order', 'asc')->get();
+        $role = $user['role'] ?? '';
+        $userDivision = $user['divisionCode'] ?? $user['division_code'] ?? null;
+
+        if ($role === 'BOD' && $userDivision === null) {
+            return true;
+        }
+
+        return $userDivision === $divisionCode;
+    }
+
+    public function getExecutiveReadModel(array $user): array
+    {
+        $divisions = Division::orderBy('sort_order', 'asc')->get()
+            ->filter(fn ($d) => $this->canAccessDivision($user, (string) $d->code));
         $divs = $divisions->map(fn ($d) => ['code' => $d->code, 'name' => $d->name])->toArray();
 
         $result = [];

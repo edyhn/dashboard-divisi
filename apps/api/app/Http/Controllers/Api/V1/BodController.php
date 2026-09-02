@@ -15,9 +15,9 @@ class BodController extends Controller
         protected BodOverviewService $bodOverview
     ) {}
 
-    public function executiveReadModel(): JsonResponse
+    public function executiveReadModel(Request $request): JsonResponse
     {
-        $data = $this->bodReadModel->getExecutiveReadModel();
+        $data = $this->bodReadModel->getExecutiveReadModel($request->attributes->get('user') ?? []);
 
         return response()->json($data);
     }
@@ -43,7 +43,7 @@ class BodController extends Controller
         $from = $request->query('from');
         $to = $request->query('to');
 
-        $data = $this->bodOverview->getOverview($from, $to);
+        $data = $this->bodOverview->getOverview($request->attributes->get('user') ?? [], $from, $to);
 
         return response()->json($data);
     }
