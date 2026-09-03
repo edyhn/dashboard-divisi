@@ -72,8 +72,8 @@ export function AppLayout() {
             to={item.path}
             className={({ isActive }) =>
               isActive
-                ? 'flex shrink-0 items-center gap-2.5 rounded-card bg-white/15 px-3 py-2.5 text-sm font-medium text-white shadow-glass backdrop-blur'
-                : 'flex shrink-0 items-center gap-2.5 rounded-card px-3 py-2.5 text-sm font-medium text-slate-300 hover:bg-white/10 hover:text-white transition-colors'
+                ? 'flex shrink-0 items-center gap-2.5 rounded-card bg-white/20 px-3 py-2.5 text-sm font-medium text-white shadow-glass backdrop-blur-md ring-1 ring-white/10'
+                : 'flex shrink-0 items-center gap-2.5 rounded-card px-3 py-2.5 text-sm font-medium text-slate-300 hover:bg-white/10 hover:text-white transition-all duration-200'
             }
           >
             <Icon className="h-4 w-4" />
@@ -85,12 +85,15 @@ export function AppLayout() {
   );
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen bg-mesh relative selection:bg-primary/20 selection:text-primary-dark">
+      {/* Decorative ambient background for layout */}
+      <div className="pointer-events-none absolute -top-40 right-0 h-96 w-96 rounded-full bg-primary/5 blur-[100px]" />
+      
       {/* Drawer mobile overlay */}
       {drawerOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-navy/40 backdrop-blur-sm" onClick={() => setDrawerOpen(false)} aria-hidden="true" />
-          <aside className="absolute left-0 top-0 h-full w-64 bg-gradient-to-b from-navy via-navy to-navy-light px-4 py-6 text-slate-200 shadow-glass">
+        <div className="fixed inset-0 z-50 lg:hidden animate-fade-in">
+          <div className="absolute inset-0 bg-navy/40 backdrop-blur-md" onClick={() => setDrawerOpen(false)} aria-hidden="true" />
+          <aside className="absolute left-0 top-0 h-full w-64 bg-gradient-to-b from-navy via-navy to-[#0b1221] px-4 py-6 text-slate-200 shadow-2xl ring-1 ring-white/10">
             <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center gap-3"><div className="flex h-9 w-9 items-center justify-center rounded-card-lg bg-white/15 text-white font-bold text-sm">DD</div><p className="text-sm font-semibold text-white">Dashboard Divisi</p></div>
               <button type="button" aria-label="Tutup menu" onClick={() => setDrawerOpen(false)} className="rounded-input p-1 text-slate-300 hover:bg-white/10 hover:text-white"><X className="h-5 w-5" /></button>
@@ -106,12 +109,12 @@ export function AppLayout() {
         </div>
       )}
       {/* Modern sidebar with gradient */}
-      <aside className="fixed inset-y-0 left-0 hidden w-64 bg-gradient-to-b from-navy via-navy to-navy-light px-4 py-6 text-slate-200 lg:block shadow-glass">
+      <aside className="fixed inset-y-0 left-0 hidden w-64 bg-gradient-to-b from-navy via-navy to-[#0b1221] px-4 py-6 text-slate-200 lg:block border-r border-white/5 shadow-glass z-50">
         <div className="mb-8 flex items-center gap-3 px-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-card bg-white/15 text-white font-bold text-sm">DD</div>
+          <div className="flex h-9 w-9 items-center justify-center rounded-card bg-gradient-to-br from-primary to-info text-white font-bold text-sm shadow-md ring-1 ring-white/20">DD</div>
           <div>
-            <p className="text-sm font-semibold text-white leading-none">Dashboard Divisi</p>
-            <p className="text-xs text-slate-400">7 divisi · Real BE</p>
+            <p className="text-sm font-bold text-white leading-none tracking-tight">Dashboard Divisi</p>
+            <p className="text-xs text-slate-400 mt-1">7 divisi · Real BE</p>
           </div>
         </div>
         {renderMenu('sidebar')}
@@ -126,9 +129,9 @@ export function AppLayout() {
         </div>
       </aside>
 
-      <div className="flex min-h-screen flex-col lg:ml-64">
+      <div className="flex min-h-screen flex-col lg:ml-64 relative z-10">
         {/* Glass header */}
-        <header className="sticky top-0 z-40 border-b border-line/60 bg-white/80 glass supports-[backdrop-filter]:bg-white/60">
+        <header className="sticky top-0 z-40 border-b border-line/40 bg-white/60 glass backdrop-blur-xl">
           <div className="flex min-h-16 flex-col gap-3 px-4 py-3 lg:flex-row lg:items-center lg:justify-between lg:px-6">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
@@ -157,28 +160,29 @@ export function AppLayout() {
             <div className="lg:hidden">{renderMenu('mobile')}</div>
           </div>
         </header>
-        <main className="flex-1 p-4 lg:p-6 bg-surface">
+        <main className="flex-1 p-4 lg:p-6 lg:px-8">
           {/* Modern context cards with glass */}
-          <section className="mb-6 grid gap-3 md:grid-cols-3" aria-label="Status konteks">
-            <div className="rounded-card-lg border border-line/60 bg-white p-4 shadow-card hover:shadow-card-hover transition-shadow">
-              <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Breadcrumb</p>
-              <p className="mt-1 text-sm font-semibold text-navy flex items-center gap-2">
+          <section className="mb-8 grid gap-4 md:grid-cols-3" aria-label="Status konteks">
+            <div className="rounded-card-lg border border-line/40 bg-white/60 backdrop-blur-md p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Breadcrumb</p>
+              <p className="mt-1.5 text-sm font-bold text-navy flex items-center gap-2">
                 {activeMenu?.label ?? 'Halaman'}
-                <span className="rounded-pill bg-primary-light px-2 py-0.5 text-xs font-medium text-primary">Real BE</span>
+                <span className="rounded-pill bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary ring-1 ring-primary/20">Real BE</span>
               </p>
             </div>
-            <div className="rounded-card-lg border border-line/60 bg-white p-4 shadow-card hover:shadow-card-hover transition-shadow">
-              <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Scope aktif</p>
-              <p className="mt-1 text-sm font-semibold text-navy">{roleLabel} · {scopeLabel}</p>
-              <p className="text-xs text-slate-500">Envelope trace_id aktif</p>
+            <div className="rounded-card-lg border border-line/40 bg-white/60 backdrop-blur-md p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Scope aktif</p>
+              <p className="mt-1.5 text-sm font-bold text-navy">{roleLabel} <span className="text-slate-400 font-normal">·</span> {scopeLabel}</p>
+              <p className="text-xs text-slate-500 mt-0.5">Envelope trace_id aktif</p>
             </div>
-            <div className="rounded-card-lg border border-line/60 bg-gradient-to-br from-success-light to-white p-4 shadow-card">
-              <p className="text-xs font-medium uppercase tracking-wider text-success">Freshness</p>
-              <p className="mt-1 text-sm font-semibold text-success flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
+            <div className="relative overflow-hidden rounded-card-lg border border-success/20 bg-gradient-to-br from-success/10 to-white/60 backdrop-blur-md p-4 shadow-sm">
+              <div className="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-success/10 blur-xl" />
+              <p className="text-xs font-semibold uppercase tracking-wider text-success">Freshness</p>
+              <p className="mt-1.5 text-sm font-bold text-success flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-success animate-pulse ring-2 ring-success/30" />
                 Sinkron real-time
               </p>
-              <p className="text-xs text-slate-600">Via proxy /api · CORS OK</p>
+              <p className="text-xs text-success/70 mt-0.5 font-medium">Via proxy /api · CORS OK</p>
             </div>
           </section>
           <Outlet />

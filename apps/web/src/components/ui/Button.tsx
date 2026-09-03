@@ -4,10 +4,10 @@ type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type Size = 'sm' | 'md' | 'lg';
 
 const variantClasses: Record<Variant, string> = {
-  primary: 'bg-primary text-white hover:bg-primary-dark border-transparent shadow-card',
-  secondary: 'bg-white text-navy border-line hover:bg-surface',
+  primary: 'bg-gradient-to-r from-primary to-info text-white hover:opacity-90 border-transparent shadow-card hover:shadow-card-hover hover:-translate-y-0.5',
+  secondary: 'bg-white text-navy border-line hover:bg-surface hover:-translate-y-0.5',
   ghost: 'bg-transparent text-slate-600 border-transparent hover:bg-surface',
-  danger: 'bg-danger text-white hover:bg-danger/90 border-transparent',
+  danger: 'bg-gradient-to-r from-danger to-danger-light text-white hover:opacity-90 border-transparent hover:-translate-y-0.5',
 };
 
 const sizeClasses: Record<Size, string> = {
@@ -25,7 +25,7 @@ export function Button({
 }: { variant?: Variant; size?: Size; children: ReactNode } & ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button
-      className={`inline-flex items-center justify-center gap-2 rounded-input border font-medium transition-all hover:shadow-card-hover disabled:opacity-50 disabled:cursor-not-allowed ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-input border font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
       {...props}
     >
       {children}

@@ -9,7 +9,7 @@ export function useBodOverview() {
   const { user, loading } = useAuth();
   return useQuery({
     queryKey: ['bod', 'overview', periodFrom, periodTo, user?.id],
-    queryFn: () => bodApi.overview(periodFrom || undefined, periodTo || undefined).then((r) => r.data),
+    queryFn: () => bodApi.overview(periodFrom || undefined, periodTo || undefined),
     enabled: !loading && !!user,
     staleTime: 5 * 60 * 1000,
   });

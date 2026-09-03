@@ -10,20 +10,20 @@ export default function LaporanPage() {
   const recon = useQuery({ queryKey: ['reports','reconciliation',params], queryFn: () => revenueApi.reconciliation(params).then(r=>r.data) });
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-card-lg border border-line bg-white p-5 shadow-card hover:shadow-card-hover transition-shadow">
+    <div className="space-y-6 animate-fade-in-up">
+      <section className="rounded-card-lg border border-line/40 bg-white/70 backdrop-blur-md p-6 shadow-sm hover:shadow-lg transition-all duration-300">
         <p className="text-sm font-medium text-primary">Reporting Center</p>
-        <h1 className="mt-1 text-2xl lg:text-3xl font-semibold text-navy">Laporan & Export</h1>
+        <h1 className="mt-1 text-2xl lg:text-3xl font-bold tracking-tight text-navy">Laporan & Export</h1>
         <p className="mt-2 text-sm text-slate-500">Real BE — /reports/transactions & /reports/reconciliation (scope + capability:view:report).</p>
       </section>
-      <section className="rounded-card-lg border border-line bg-white p-5 shadow-card hover:shadow-card-hover transition-shadow">
+      <section className="rounded-card-lg border border-line/40 bg-white/70 backdrop-blur-md p-6 shadow-sm hover:shadow-lg transition-all duration-300">
         <h2 className="text-lg font-semibold text-navy">Katalog laporan</h2>
-        <div className="mt-3 flex items-center justify-between rounded-card-lg border border-line/60 p-4">
+        <div className="mt-3 flex items-center justify-between rounded-card-lg border border-line/40 p-4">
           <div><p className="font-medium text-navy">Payroll Summary</p><p className="text-sm text-slate-500">BOD only — guarded `view:report` + scope</p></div>
           <span className="rounded-pill bg-primary-light px-3 py-1 text-xs font-medium text-primary border border-primary/20">Restricted</span>
         </div>
       </section>
-      <section className="rounded-card-lg border border-line bg-white p-5 shadow-card hover:shadow-card-hover transition-shadow">
+      <section className="rounded-card-lg border border-line/40 bg-white/70 backdrop-blur-md p-6 shadow-sm hover:shadow-lg transition-all duration-300">
         <h2 className="text-lg font-semibold text-navy">Transaksi</h2>
         {(() => {
           if (tx.isLoading) return <LoadingState />;
@@ -35,18 +35,18 @@ export default function LaporanPage() {
           const rows = d?.byMethod ?? [];
           if (rows.length === 0) return <EmptyState description="Belum ada transaksi untuk filter ini." />;
           return (
-            <div className="mt-4 overflow-x-auto rounded-card-lg border border-line/60">
+            <div className="mt-4 overflow-x-auto rounded-card-lg border border-line/40">
               <table className="min-w-[520px] w-full text-left text-sm">
                 <caption className="sr-only">Transaksi per metode</caption>
                 <thead className="bg-surface text-slate-500"><tr><th scope="col" className="px-4 py-3">Metode</th><th scope="col" className="px-4 py-3">Nominal</th><th scope="col" className="px-4 py-3">Transaksi</th><th scope="col" className="px-4 py-3">Share</th></tr></thead>
-                <tbody className="divide-y divide-line/60">{rows.map((r) => <tr key={r.method}><td className="px-4 py-3 font-medium text-navy">{r.method}</td><td className="px-4 py-3 font-mono text-xs">Rp {r.amount}</td><td className="px-4 py-3">{r.transactionCount}</td><td className="px-4 py-3">{r.sharePercent != null ? `${r.sharePercent}%` : '—'}</td></tr>)}</tbody>
+                <tbody className="divide-y divide-line/40">{rows.map((r) => <tr key={r.method}><td className="px-4 py-3 font-medium text-navy">{r.method}</td><td className="px-4 py-3 font-mono text-xs">Rp {r.amount}</td><td className="px-4 py-3">{r.transactionCount}</td><td className="px-4 py-3">{r.sharePercent != null ? `${r.sharePercent}%` : '—'}</td></tr>)}</tbody>
               </table>
             </div>
           );
         })()}
         <p className="mt-2 text-xs text-slate-400 lg:hidden">Geser → untuk lihat kolom</p>
       </section>
-      <section className="rounded-card-lg border border-line bg-white p-5 shadow-card hover:shadow-card-hover transition-shadow">
+      <section className="rounded-card-lg border border-line/40 bg-white/70 backdrop-blur-md p-6 shadow-sm hover:shadow-lg transition-all duration-300">
         <h2 className="text-lg font-semibold text-navy">Rekonsiliasi</h2>
         {(() => {
           if (recon.isLoading) return <LoadingState />;
@@ -59,14 +59,14 @@ export default function LaporanPage() {
           const t = d.totals;
           return (
             <div className="mt-3 grid gap-3 md:grid-cols-3">
-              <div className="rounded-card-lg border border-line/60 p-4"><p className="text-xs uppercase tracking-wider text-slate-400">Kasir</p><p className="mt-1 font-mono text-sm font-semibold text-navy">Rp {t.cashierAmount ?? '0'}</p></div>
-              <div className="rounded-card-lg border border-line/60 p-4"><p className="text-xs uppercase tracking-wider text-slate-400">Bank</p><p className="mt-1 font-mono text-sm font-semibold text-navy">Rp {t.bankAmount ?? '0'}</p></div>
+              <div className="rounded-card-lg border border-line/40 p-4"><p className="text-xs uppercase tracking-wider text-slate-400">Kasir</p><p className="mt-1 font-mono text-sm font-semibold text-navy">Rp {t.cashierAmount ?? '0'}</p></div>
+              <div className="rounded-card-lg border border-line/40 p-4"><p className="text-xs uppercase tracking-wider text-slate-400">Bank</p><p className="mt-1 font-mono text-sm font-semibold text-navy">Rp {t.bankAmount ?? '0'}</p></div>
               <div className={`rounded-card-lg border p-4 ${t.variance && t.variance !== '0.00' ? 'border-warning/30 bg-warning-light/40' : 'border-success/20 bg-success-light/30'}`}><p className="text-xs uppercase tracking-wider text-slate-400">Variance</p><p className="mt-1 font-mono text-sm font-semibold">Rp {t.variance ?? '0'}</p></div>
             </div>
           );
         })()}
       </section>
-      <section className="rounded-card-lg border border-line bg-white p-5 shadow-card hover:shadow-card-hover transition-shadow">
+      <section className="rounded-card-lg border border-line/40 bg-white/70 backdrop-blur-md p-6 shadow-sm hover:shadow-lg transition-all duration-300">
         <h2 className="text-lg font-semibold text-navy">Access guardrail</h2>
         <p className="text-sm text-slate-500">Export lintas divisi guard oleh capability:view:report + scope.</p>
       </section>

@@ -11,7 +11,7 @@ describe('ORG-06 RouteGuard per capability & division — 7 divisi', () => {
     expect(hasCapability('BOD', 'view:division')).toBe(true);
     expect(hasCapability('BOD', 'random:cap')).toBe(true);
     expect(hasCapability('MANAGER', 'view:division')).toBe(true);
-    expect(hasCapability('MANAGER', 'write:revenue')).toBe(false);
+    expect(hasCapability('MANAGER', 'write:revenue')).toBe(true); // Data Dictionary v0.2 §1.2
     expect(hasCapability('ADMIN', 'write:revenue')).toBe(true);
     expect(hasCapability('ADMIN', 'manage:division')).toBe(false);
   });
