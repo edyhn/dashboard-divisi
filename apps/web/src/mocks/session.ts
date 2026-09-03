@@ -1,8 +1,16 @@
-export const ROLES = ['BOD', 'MANAGER', 'ADMIN'] as const;
+export const ROLES = ['BOD', 'MANAGER', 'ADMIN', 'PIC'] as const;
 export const LEGACY_ROLES = ['SUPERADMIN', 'HRD', 'USER'] as const;
 export type Role = (typeof ROLES)[number] | (typeof LEGACY_ROLES)[number];
 
-export const ROLE_LABEL: Record<string, string> = { BOD: 'Executive', MANAGER: 'Superadmin', ADMIN: 'Admin', SUPERADMIN: 'Superadmin', HRD: 'HRD', USER: 'User' };
+export const ROLE_LABEL: Record<string, string> = {
+  BOD: 'Executive (BOD)',
+  MANAGER: 'Superadmin (Manager)',
+  ADMIN: 'Admin',
+  PIC: 'PIC',
+  SUPERADMIN: 'Superadmin (Manager)',
+  HRD: 'HRD',
+  USER: 'PIC',
+};
 export function roleDisplay(role: string): string { return ROLE_LABEL[role] ?? role; }
 
 export interface SessionUser {
@@ -15,9 +23,10 @@ export const MOCK_SESSIONS: Record<string, SessionUser> = {
   BOD: { name: 'Bodi Demo', role: 'BOD', divisionCode: null },
   MANAGER: { name: 'Mina Demo', role: 'MANAGER', divisionCode: 'WRAP' },
   ADMIN: { name: 'Admin Demo', role: 'ADMIN', divisionCode: 'WRAP' },
+  PIC: { name: 'PIC Demo (View Only)', role: 'USER', divisionCode: 'WRAP' },
   SUPERADMIN: { name: 'Super Demo', role: 'SUPERADMIN', divisionCode: null },
   HRD: { name: 'Hera Demo', role: 'HRD', divisionCode: null },
-  USER: { name: 'Usman Demo', role: 'USER', divisionCode: null },
+  USER: { name: 'Usman Demo (PIC)', role: 'USER', divisionCode: null },
 };
 
 export interface MenuItem {
@@ -28,15 +37,13 @@ export interface MenuItem {
 }
 
 export const MENU_ITEMS: MenuItem[] = [
-  { path: '/dashboard', label: 'Ringkasan', roles: ROLES, capability: 'view:division' },
-  { path: '/omzet', label: 'Data Omzet', roles: ['MANAGER', 'ADMIN'], capability: 'write:revenue' },
-  { path: '/target', label: 'Target & Realisasi', roles: ['MANAGER', 'ADMIN', 'BOD'], capability: 'write:target' },
-  { path: '/penilaian', label: 'Penilaian Performa', roles: ['MANAGER', 'BOD'], capability: 'write:assessment' },
-  { path: '/karyawan', label: 'Data Karyawan', roles: ['MANAGER', 'ADMIN'], capability: 'view:workforce' },
-  { path: '/workforce', label: 'Kehadiran & Cuti', roles: ['MANAGER', 'ADMIN'], capability: 'view:workforce' },
-  { path: '/laporan', label: 'Laporan', roles: ['BOD', 'MANAGER', 'ADMIN'], capability: 'view:report' },
-  { path: '/konfigurasi', label: 'Konfigurasi', roles: ['MANAGER'], capability: 'manage:config' },
-  { path: '/demo', label: 'Demo States', roles: ROLES },
+  { path: '/dashboard', label: 'Dashboard', roles: ['BOD', 'MANAGER', 'ADMIN', 'PIC', 'SUPERADMIN', 'HRD', 'USER'] },
+  { path: '/laporan-harian', label: 'Report Harian', roles: ['BOD', 'MANAGER', 'ADMIN', 'PIC', 'SUPERADMIN', 'HRD', 'USER'] },
+  { path: '/rincian-tenant', label: 'Rincian Omset Tenant', roles: ['BOD', 'MANAGER', 'ADMIN', 'PIC', 'SUPERADMIN', 'HRD', 'USER'] },
+  { path: '/laporan', label: 'Detail Laporan', roles: ['BOD', 'MANAGER', 'ADMIN', 'PIC', 'SUPERADMIN', 'HRD', 'USER'] },
+  { path: '/budgeting', label: 'Format Budgeting', roles: ['BOD', 'MANAGER', 'ADMIN', 'PIC', 'SUPERADMIN', 'HRD', 'USER'] },
+  { path: '/cashflow', label: 'Cashflow', roles: ['BOD', 'MANAGER', 'ADMIN', 'PIC', 'SUPERADMIN', 'HRD', 'USER'] },
+  { path: '/pnl', label: 'PNL', roles: ['BOD', 'MANAGER', 'ADMIN', 'PIC', 'SUPERADMIN', 'HRD', 'USER'] },
 ];
 
 export function homePathForRole(role: Role): string {

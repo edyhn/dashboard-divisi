@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { LayoutDashboard, TrendingUp, Target, Award, Users, ClipboardList, BarChart3, Settings, LogOut, Menu, X } from 'lucide-react';
+import { NavLink, Outlet, useLocation, Navigate } from 'react-router-dom';
+import { LayoutDashboard, TrendingUp, Target, Award, Users, ClipboardList, BarChart3, Settings, Menu, X, Calendar, Store, Calculator, DollarSign, PieChart } from 'lucide-react';
 import { MENU_ITEMS, roleDisplay } from '../mocks/session';
 import { useAuth } from '../session/AuthContext';
-import { useSession } from '../session/SessionContext';
+import LogoutButton from '../components/LogoutButton';
 import { hasCapability } from '../session/capability';
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -15,6 +15,11 @@ const ICON_MAP: Record<string, React.ElementType> = {
   '/workforce': ClipboardList,
   '/laporan': BarChart3,
   '/konfigurasi': Settings,
+  '/laporan-harian': Calendar,
+  '/rincian-tenant': Store,
+  '/budgeting': Calculator,
+  '/cashflow': DollarSign,
+  '/pnl': PieChart,
 };
 
 export function AppLayout() {
@@ -27,29 +32,27 @@ export function AppLayout() {
     document.body.style.overflow = 'hidden';
     return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
   }, [drawerOpen]);
-  let authUser: ReturnType<typeof useAuth>['user'] | null = null;
-  let authLogout: () => Promise<void> = async () => {};
-  try {
-    const a = useAuth();
-    authUser = a.user;
-    authLogout = a.logout;
-  } catch {}
-  let sessionUser: ReturnType<typeof useSession>['user'] | null = null;
-  try {
-    const s = useSession();
-    sessionUser = s.user;
-  } catch {}
-  const user = authUser ?? (sessionUser as unknown as typeof authUser) ?? null;
-  const logout = authLogout;
+  const { user, login: authLogin, logout: authLogout } = useAuth();
+  const logout = async () => {
+    await authLogout();
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('dashboard-divisi.role-demo');
+    localStorage.removeItem('dashboard-divisi.division-demo');
+    window.location.href = '/login';
+  };
+
+  const handleQuickSwitch = async (email: string) => {
+    try {
+      await authLogin(email, 'Password123!');
+    } catch {
+      alert('Gagal switch role instan. Pastikan backend berjalan.');
+    }
+  };
 
   const location = useLocation();
 
   if (!user) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-surface">
-        <p className="text-sm text-slate-500">Memuat sesi — silakan login</p>
-      </div>
-    );
+    return <Navigate to="/login" replace />;
   }
 
   const activeMenu = MENU_ITEMS.find((item) => item.path === location.pathname);
@@ -104,12 +107,12 @@ export function AppLayout() {
                 return <NavLink key={item.path} to={item.path} onClick={() => setDrawerOpen(false)} className={({ isActive }) => isActive ? 'flex items-center gap-2.5 rounded-card-lg bg-white/15 px-3 py-2.5 text-sm font-medium text-white shadow-glass' : 'flex items-center gap-2.5 rounded-card-lg px-3 py-2.5 text-sm font-medium text-slate-300 hover:bg-white/10'}><Icon className="h-4 w-4" />{item.label}</NavLink>;
               })}
             </nav>
-            <div className="absolute bottom-4 left-4 right-4 rounded-card-lg bg-white/10 p-3"><p className="text-xs font-medium text-white">{user.name}</p><p className="text-xs text-slate-300">{roleLabel} · {scopeLabel}</p><button onClick={() => void logout()} className="mt-2 flex w-full items-center gap-1.5 rounded-input bg-white/10 px-2 py-1.5 text-xs font-medium text-white hover:bg-white/15"><LogOut className="h-3.5 w-3.5" /> Keluar</button></div>
+            
           </aside>
         </div>
       )}
       {/* Modern sidebar with gradient */}
-      <aside className="fixed inset-y-0 left-0 hidden w-64 bg-gradient-to-b from-navy via-navy to-[#0b1221] px-4 py-6 text-slate-200 lg:block border-r border-white/5 shadow-glass z-50">
+      <aside className="fixed inset-y-0 left-0 hidden w-64 bg-gradient-to-b from-navy via-navy to-[#0b1221] px-4 py-6 text-slate-200 lg:block border-r border-white/5 shadow-glass z-50 flex flex-col">
         <div className="mb-8 flex items-center gap-3 px-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-card bg-gradient-to-br from-primary to-info text-white font-bold text-sm shadow-md ring-1 ring-white/20">DD</div>
           <div>
@@ -118,14 +121,10 @@ export function AppLayout() {
           </div>
         </div>
         {renderMenu('sidebar')}
-        <div className="absolute bottom-4 left-4 right-4">
-          <div className="rounded-card bg-white/10 p-3">
-            <p className="text-xs font-medium text-white">{user.name}</p>
-            <p className="text-xs text-slate-300">{roleLabel} · {scopeLabel}</p>
-            <button onClick={() => void logout()} className="mt-2 flex w-full items-center gap-1.5 rounded-input bg-white/10 px-2 py-1.5 text-xs font-medium text-white hover:bg-white/15 transition-colors">
-              <LogOut className="h-3.5 w-3.5" /> Keluar
-            </button>
-          </div>
+        <div className="absolute bottom-4 left-4 right-4 rounded-card-lg bg-white/10 p-3">
+          <p className="text-xs font-medium text-white">{user.name}</p>
+          <p className="text-xs text-slate-300">{roleLabel} · {scopeLabel}</p>
+          <LogoutButton onLogout={() => void logout()} className="mt-2 flex w-full items-center gap-1.5 rounded-input bg-white/10 px-2 py-1.5 text-xs font-medium text-white hover:bg-white/15 transition-colors" />
         </div>
       </aside>
 
@@ -147,44 +146,30 @@ export function AppLayout() {
               <span className="text-sm font-medium lg:hidden">{user.name}</span>
             </div>
             <div className="flex items-center gap-3">
+              <div className="hidden lg:flex items-center gap-2 rounded-full border border-line bg-white/90 px-3 py-1.5 text-xs shadow-sm">
+                <span className="text-slate-500 font-semibold">⚡ Quick Role:</span>
+                <select
+                  value={user.email}
+                  onChange={(e) => { if (e.target.value && e.target.value !== user.email) void handleQuickSwitch(e.target.value); }}
+                  className="bg-transparent font-bold text-navy focus:outline-none cursor-pointer"
+                >
+                  <option value="bod1@dashboard.test">👔 Executive (BOD)</option>
+                  <option value="manager.wrap@dashboard.test">⚡ Superadmin (Manager)</option>
+                  <option value="admin.wrap@dashboard.test">📝 Admin Divisi</option>
+                  <option value="pic@dashboard.test">🔒 PIC (View Only)</option>
+                </select>
+              </div>
               <div className="hidden lg:flex items-center gap-2 rounded-full bg-surface px-3 py-1.5 text-xs">
                 <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
                 <span className="font-medium text-navy">{roleLabel}</span>
                 <span className="text-slate-400">·</span>
                 <span className="text-slate-600">{scopeLabel}</span>
               </div>
-              <button onClick={() => void logout()} className="hidden lg:flex items-center gap-1.5 rounded-input border border-line bg-white px-3 py-1.5 text-sm font-medium text-navy hover:bg-surface transition-colors">
-                <LogOut className="h-4 w-4" /> Keluar
-              </button>
             </div>
             <div className="lg:hidden">{renderMenu('mobile')}</div>
           </div>
         </header>
         <main className="flex-1 p-4 lg:p-6 lg:px-8">
-          {/* Modern context cards with glass */}
-          <section className="mb-8 grid gap-4 md:grid-cols-3" aria-label="Status konteks">
-            <div className="rounded-card-lg border border-line/40 bg-white/60 backdrop-blur-md p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Breadcrumb</p>
-              <p className="mt-1.5 text-sm font-bold text-navy flex items-center gap-2">
-                {activeMenu?.label ?? 'Halaman'}
-                <span className="rounded-pill bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary ring-1 ring-primary/20">Real BE</span>
-              </p>
-            </div>
-            <div className="rounded-card-lg border border-line/40 bg-white/60 backdrop-blur-md p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Scope aktif</p>
-              <p className="mt-1.5 text-sm font-bold text-navy">{roleLabel} <span className="text-slate-400 font-normal">·</span> {scopeLabel}</p>
-              <p className="text-xs text-slate-500 mt-0.5">Envelope trace_id aktif</p>
-            </div>
-            <div className="relative overflow-hidden rounded-card-lg border border-success/20 bg-gradient-to-br from-success/10 to-white/60 backdrop-blur-md p-4 shadow-sm">
-              <div className="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-success/10 blur-xl" />
-              <p className="text-xs font-semibold uppercase tracking-wider text-success">Freshness</p>
-              <p className="mt-1.5 text-sm font-bold text-success flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-success animate-pulse ring-2 ring-success/30" />
-                Sinkron real-time
-              </p>
-              <p className="text-xs text-success/70 mt-0.5 font-medium">Via proxy /api · CORS OK</p>
-            </div>
-          </section>
           <Outlet />
         </main>
       </div>

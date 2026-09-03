@@ -48,6 +48,46 @@ globalThis.fetch = async (input: RequestInfo | URL, _init?: RequestInit) => {
   if (url.includes('/revenue/daily') || url.includes('/reports/') || url.includes('/org/')) {
     return new Response(JSON.stringify({ data: [], meta: { trace_id: 'test-trace' } }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   }
+  if (url.includes('/sobathr/status')) {
+    return new Response(JSON.stringify({
+      data: {
+        provider: 'Sobat API',
+        configured: false,
+        status: 'UNCONFIGURED',
+        base_url: null,
+        has_api_key: false,
+        has_company_id: false,
+        last_sync: null,
+        scheduler: 'MANUAL_ONLY',
+      },
+      meta: { trace_id: 'test-trace' },
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  }
+  if (url.includes('/sobathr/sync-tenants')) {
+    return new Response(JSON.stringify({
+      data: {
+        provider: 'Sobat API',
+        source: 'LIVE_SOBAT_API',
+        division_code: 'WRAP',
+        total_tenants: 1,
+        synced_at: '2026-09-03T07:00:00Z',
+        tenants: [
+          {
+            id: 'TNT-001',
+            name: 'Wrapping Master Outlet 1',
+            division: 'WRAP',
+            category: 'Wrapping',
+            location: 'Lantai 1 - A01',
+            monthlyRevenue: 125000000,
+            monthlyTarget: 100000000,
+            status: 'Over Target',
+            growth: 14.2,
+          },
+        ],
+      },
+      meta: { trace_id: 'test-trace' },
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  }
   // fallback ke fetch asli jika ada
   if (originalFetch) return originalFetch(input as RequestInfo, _init);
   return new Response(JSON.stringify({ data: null, meta: { trace_id: 'test-trace' } }), { status: 200, headers: { 'Content-Type': 'application/json' } });

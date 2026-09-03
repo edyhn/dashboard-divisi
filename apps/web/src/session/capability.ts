@@ -24,3 +24,9 @@ export function canAccessDivision(
   if (user.role === 'SUPERADMIN' && !user.divisionCode) return true;
   return user.divisionCode === divisionCode;
 }
+
+// New helper: Determines if a role can edit reporting data. PIC users (role 'USER') are view‑only.
+export function canEditReporting(role: Role): boolean {
+  // Assuming 'USER' is the PIC role; adjust if different.
+  return role !== 'USER';
+}

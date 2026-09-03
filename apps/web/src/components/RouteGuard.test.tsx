@@ -6,6 +6,8 @@ import { RouteGuard } from './RouteGuard';
 import { hasCapability, canAccessDivision } from '../session/capability';
 import type { Role } from '../mocks/session';
 
+import { AuthProvider } from '../session/AuthContext';
+
 describe('ORG-06 RouteGuard per capability & division — 7 divisi', () => {
   it('hasCapability: BOD all, Manager limited', () => {
     expect(hasCapability('BOD', 'view:division')).toBe(true);
@@ -33,11 +35,13 @@ describe('ORG-06 RouteGuard per capability & division — 7 divisi', () => {
     localStorage.removeItem('dashboard-divisi.division-demo');
     render(
       <MemoryRouter>
-        <SessionProvider>
-          <RouteGuard capability="manage:division" fallback={<div data-testid="blocked">blocked</div>}>
-            <div data-testid="ok">ok</div>
-          </RouteGuard>
-        </SessionProvider>
+        <AuthProvider>
+          <SessionProvider>
+            <RouteGuard capability="manage:division" fallback={<div data-testid="blocked">blocked</div>}>
+              <div data-testid="ok">ok</div>
+            </RouteGuard>
+          </SessionProvider>
+        </AuthProvider>
       </MemoryRouter>,
     );
     expect(screen.getByTestId('blocked')).toBeDefined();
@@ -50,11 +54,13 @@ describe('ORG-06 RouteGuard per capability & division — 7 divisi', () => {
     localStorage.setItem('dashboard-divisi.division-demo', 'WRAP');
     render(
       <MemoryRouter>
-        <SessionProvider>
-          <RouteGuard divisionCode="CELL" fallback={<div data-testid="blocked">blocked</div>}>
-            <div data-testid="ok">ok</div>
-          </RouteGuard>
-        </SessionProvider>
+        <AuthProvider>
+          <SessionProvider>
+            <RouteGuard divisionCode="CELL" fallback={<div data-testid="blocked">blocked</div>}>
+              <div data-testid="ok">ok</div>
+            </RouteGuard>
+          </SessionProvider>
+        </AuthProvider>
       </MemoryRouter>,
     );
     expect(screen.getByTestId('blocked')).toBeDefined();
@@ -65,11 +71,13 @@ describe('ORG-06 RouteGuard per capability & division — 7 divisi', () => {
     localStorage.setItem('dashboard-divisi.role-demo', 'BOD');
     render(
       <MemoryRouter>
-        <SessionProvider>
-          <RouteGuard capability="view:division" divisionCode="WRAP">
-            <div data-testid="ok">ok</div>
-          </RouteGuard>
-        </SessionProvider>
+        <AuthProvider>
+          <SessionProvider>
+            <RouteGuard capability="view:division" divisionCode="WRAP">
+              <div data-testid="ok">ok</div>
+            </RouteGuard>
+          </SessionProvider>
+        </AuthProvider>
       </MemoryRouter>,
     );
     expect(screen.getByTestId('ok')).toBeDefined();
