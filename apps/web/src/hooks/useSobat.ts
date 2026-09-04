@@ -12,6 +12,17 @@ export function useSobatStatus() {
   });
 }
 
+export function useSobatTenants(divisionCode?: string | null) {
+  const { user, loading } = useAuth();
+  return useQuery<SobatSyncResultDto>({
+    queryKey: ['sobathr', 'tenants', user?.id, divisionCode],
+    queryFn: () => sobathrApi.syncTenants(divisionCode ?? undefined).then((r) => r.data),
+    enabled: !loading && !!user,
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+  });
+}
+
 export function useSobatSyncTenants() {
   const qc = useQueryClient();
   return useMutation<SobatSyncResultDto, Error, string | undefined>({

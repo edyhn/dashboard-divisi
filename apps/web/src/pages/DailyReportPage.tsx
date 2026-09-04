@@ -3,6 +3,7 @@ import { Calendar, Plus, Filter, CheckCircle2, AlertCircle, Clock, ShieldCheck, 
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { useAuth } from '../session/AuthContext';
+import { hasCapability } from '../session/capability';
 
 interface DailyRecord {
   id: string;
@@ -32,7 +33,7 @@ const INITIAL_REPORTS: DailyRecord[] = [
 export default function DailyReportPage() {
   const { user } = useAuth();
   const isBod = user?.role === 'BOD';
-  const isPicViewOnly = user?.role === 'PIC' || user?.role === 'USER';
+  const isPicViewOnly = !hasCapability(user?.role as never, 'write:revenue');
   const isManager = user?.role === 'MANAGER' || user?.role === 'SUPERADMIN';
   const userDivision = user?.divisionCode; // NULL jika BOD, atau 'WRAP'/'CELL'/dll.
 

@@ -9,9 +9,9 @@ import type { Role } from '../mocks/session';
 import { AuthProvider } from '../session/AuthContext';
 
 describe('ORG-06 RouteGuard per capability & division — 7 divisi', () => {
-  it('hasCapability: BOD all, Manager limited', () => {
+  it('hasCapability: BOD explicit view, Manager limited', () => {
     expect(hasCapability('BOD', 'view:division')).toBe(true);
-    expect(hasCapability('BOD', 'random:cap')).toBe(true);
+    expect(hasCapability('BOD', 'random:cap')).toBe(false);
     expect(hasCapability('MANAGER', 'view:division')).toBe(true);
     expect(hasCapability('MANAGER', 'write:revenue')).toBe(true); // Data Dictionary v0.2 §1.2
     expect(hasCapability('ADMIN', 'write:revenue')).toBe(true);

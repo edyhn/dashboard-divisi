@@ -45,6 +45,7 @@ Route::prefix('v1')->group(function () {
             Route::get('bod/executive-read-model', [BodController::class, 'executiveReadModel']);
             Route::get('bod/kpi-compatibility', [BodController::class, 'checkCompatibility']);
             Route::get('bod/overview', [BodController::class, 'overview']);
+            Route::get('bod/pnl-comparison', [BodController::class, 'pnlComparison']);
             Route::get('division-configs', [DivisionConfigController::class, 'getAll']);
         });
 

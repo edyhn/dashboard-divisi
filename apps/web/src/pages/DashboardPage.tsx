@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../session/AuthContext';
 import { roleDisplay } from '../mocks/session';
 import { Button } from '../components/ui/Button';
+import BodExecutiveDashboard from '../components/dashboard/BodExecutiveDashboard';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -75,44 +76,7 @@ export default function DashboardPage() {
 
       {/* ==================== VIEW ROLE 1: EXECUTIVE (BOD) ==================== */}
       {isBod && (
-        <div className="space-y-6">
-          <div className="rounded-card-lg border border-line/40 bg-white/80 backdrop-blur-md p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-navy">Executive Performance Matrix (7 Divisi Konsolidasi)</h2>
-            <p className="text-xs text-slate-500">Ringkasan hasil akhir yang telah disetujui (ACC) oleh Manager masing-masing divisi</p>
-
-            <div className="mt-4 grid gap-4 md:grid-cols-4">
-              <div className="rounded-card-lg border border-line/40 bg-primary/5 p-4">
-                <p className="text-xs font-semibold uppercase text-slate-500">Total Omset Realisasi</p>
-                <p className="mt-2 text-2xl font-black text-navy">Rp 2.462.500.000</p>
-                <p className="mt-1 text-xs text-success font-bold">+14.8% vs Target Q3</p>
-              </div>
-              <div className="rounded-card-lg border border-line/40 bg-success/5 p-4">
-                <p className="text-xs font-semibold uppercase text-slate-500">Net Profit Margin</p>
-                <p className="mt-2 text-2xl font-black text-navy">49.0%</p>
-                <p className="mt-1 text-xs text-success font-bold">Laba Bersih Rp 1.2M</p>
-              </div>
-              <div className="rounded-card-lg border border-line/40 bg-info/5 p-4">
-                <p className="text-xs font-semibold uppercase text-slate-500">Tingkat ACC Manager</p>
-                <p className="mt-2 text-2xl font-black text-navy">85.7%</p>
-                <p className="mt-1 text-xs text-info font-bold">6 dari 7 Divisi Complete</p>
-              </div>
-              <div className="rounded-card-lg border border-line/40 bg-warning/5 p-4">
-                <p className="text-xs font-semibold uppercase text-slate-500">Status Financial Health</p>
-                <p className="mt-2 text-xl font-black text-success">Sangat Sehat</p>
-                <p className="mt-1 text-xs text-slate-500">Zero Variance Audit</p>
-              </div>
-            </div>
-
-            <div className="mt-6 flex gap-3">
-              <Link to="/laporan" className="rounded-input bg-navy px-4 py-2.5 text-xs font-bold text-white hover:bg-navy-light transition-colors">
-                Buka Detail Laporan BOD
-              </Link>
-              <Link to="/pnl" className="rounded-input border border-line bg-white px-4 py-2.5 text-xs font-bold text-navy hover:bg-surface transition-colors">
-                Tinjau Laporan PnL
-              </Link>
-            </div>
-          </div>
-        </div>
+        <BodExecutiveDashboard />
       )}
 
       {/* ==================== VIEW ROLE 2: MANAGER (SUPERADMIN) ==================== */}

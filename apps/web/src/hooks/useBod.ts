@@ -15,6 +15,16 @@ export function useBodOverview() {
   });
 }
 
+export function usePnlComparison(year?: number, divisions?: string[], outlets?: string[], periodType?: 'monthly' | 'daily', month?: number) {
+  const { user, loading } = useAuth();
+  return useQuery({
+    queryKey: ['bod', 'pnl-comparison', year, divisions, outlets, periodType, month, user?.id],
+    queryFn: () => bodApi.pnlComparison(year, divisions, outlets, periodType, month).then(r => r.data),
+    enabled: !loading && !!user,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 export function useExecutiveReadModel() {
   const { user, loading } = useAuth();
   return useQuery({ queryKey: ['bod', 'executive', user?.id], queryFn: () => bodApi.executive().then((r) => r.data), enabled: !loading && !!user, staleTime: 5 * 60 * 1000 });

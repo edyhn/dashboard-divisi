@@ -9,49 +9,43 @@ import {
   Download,
   ArrowUpRight,
   ShieldCheck,
-  RefreshCw,
-  CheckCircle,
   AlertCircle,
-  XCircle,
-  Lock,
+  RefreshCw,
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { useAuth } from '../session/AuthContext';
 import { hasCapability } from '../session/capability';
-import { useSobatStatus, useSobatSyncTenants } from '../hooks/useSobat';
+import { useSobatStatus, useSobatTenants } from '../hooks/useSobat';
 import type { TenantRecordDto } from '../api/sobathr';
-
-const INITIAL_TENANTS: TenantRecordDto[] = [
-  { id: 'TNT-001', name: 'Wrapping Master Outlet 1', division: 'WRAP', category: 'Wrapping', location: 'Lantai 1 - A01', monthlyRevenue: 125000000, monthlyTarget: 100000000, status: 'Over Target', growth: +14.2 },
-  { id: 'TNT-002', name: 'Cellular Flagship Store', division: 'CELL', category: 'Cellular', location: 'Lantai 1 - A05', monthlyRevenue: 310000000, monthlyTarget: 280000000, status: 'Over Target', growth: +11.1 },
-  { id: 'TNT-003', name: 'Refleksi Family Wellness', division: 'REFL', category: 'Refleksi', location: 'Lantai 2 - B12', monthlyRevenue: 98000000, monthlyTarget: 95000000, status: 'On Track', growth: +5.1 },
-  { id: 'TNT-004', name: 'Minimarket Serba Ada', division: 'MINI', category: 'Minimarket', location: 'Lantai 1 - A10', monthlyRevenue: 185000000, monthlyTarget: 190000000, status: 'Action Needed', growth: -2.4 },
-  { id: 'TNT-005', name: 'FnB Resto Kuliner Nusantara', division: 'FNB', category: 'F&B', location: 'Lantai 2 - B01', monthlyRevenue: 250000000, monthlyTarget: 220000000, status: 'Over Target', growth: +15.9 },
-  { id: 'TNT-006', name: 'Finance Service Counter', division: 'FIN', category: 'Finance', location: 'Lantai 3 - C01', monthlyRevenue: 480000000, monthlyTarget: 450000000, status: 'On Track', growth: +6.0 },
-  { id: 'TNT-007', name: 'Money Changer Global Exchange', division: 'MC', category: 'Money Changer', location: 'Lantai 1 - A02', monthlyRevenue: 620000000, monthlyTarget: 600000000, status: 'Over Target', growth: +8.5 },
-];
 
 export default function TenantRevenuePage() {
   const { user } = useAuth();
   const isBod = user?.role === 'BOD';
-  const canSync = hasCapability(user?.role as never, 'write:revenue');
-  const isPicViewOnly = !canSync || user?.role === 'PIC' || user?.role === 'USER';
-  const userDivision = user?.divisionCode;
+  const canEdit = hasCapability(user?.role as never, 'write:revenue');
+  const isPicViewOnly = !canEdit;
+  const userDivision = user?.divisionCode ?? null;
 
-  const [tenants, setTenants] = useState<TenantRecordDto[]>(INITIAL_TENANTS);
+  const [editTenants, setEditTenants] = useState<TenantRecordDto[]>([]);
+  const [hasLocalEdits, setHasLocalEdits] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [toastMsg, setToastMsg] = useState<string | null>(null);
-  const [syncError, setSyncError] = useState<string | null>(null);
 
-  // TanStack Query status & mutation hooks
+  // TanStack Query hooks
   const { data: sobatStatus } = useSobatStatus();
-  const syncMutation = useSobatSyncTenants();
+  const { data: tenantsData, isLoading, isError, error } = useSobatTenants(userDivision);
+
+  // Use live data from query, or local-edited data if user has made edits
+  const liveTenants: TenantRecordDto[] = tenantsData?.tenants ?? [];
+  const tenants = hasLocalEdits ? editTenants : liveTenants;
+
+  // Sync local edits base when fresh data arrives
+  if (!hasLocalEdits && liveTenants.length > 0 && editTenants.length === 0) {
+    setEditTenants(liveTenants);
+  }
 
   // Edit Target Modal State
   const [selectedTenant, setSelectedTenant] = useState<TenantRecordDto | null>(null);
   const [newTarget, setNewTarget] = useState<number>(0);
-
   // Filter Scoping Divisi (Manager/Admin/PIC hanya melihat divisinya sendiri)
   const scopedTenants = tenants.filter((t) => {
     if (isBod || !userDivision) return true;
@@ -69,55 +63,24 @@ export default function TenantRevenuePage() {
   const avgRev = Math.round(totalTenantRev / Math.max(scopedTenants.length, 1));
   const topTenant = [...scopedTenants].sort((a, b) => b.monthlyRevenue - a.monthlyRevenue)[0];
 
-  const handleSyncTenants = async () => {
-    if (!canSync || syncMutation.isPending) return;
-    setSyncError(null);
-    try {
-      const res = await syncMutation.mutateAsync(userDivision ?? undefined);
-      if (res?.tenants && res.tenants.length > 0) {
-        setTenants(res.tenants);
-      }
-      setToastMsg(`✅ Berhasil sinkronisasi ${res?.total_tenants ?? 0} data tenant dari Sobat API!`);
-      setTimeout(() => setToastMsg(null), 4000);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Gagal menghubungi server untuk sinkronisasi Sobat API.';
-      setSyncError(message);
-    }
-  };
-
   const handleSaveTarget = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedTenant) return;
-
-    setTenants(
-      tenants.map((t) => {
-        if (t.id === selectedTenant.id) {
-          const pct = (t.monthlyRevenue / newTarget) * 100;
-          const status = pct >= 110 ? 'Over Target' : pct >= 95 ? 'On Track' : 'Action Needed';
-          return { ...t, monthlyTarget: newTarget, status };
-        }
-        return t;
-      }),
-    );
+    const updated = tenants.map((t) => {
+      if (t.id === selectedTenant.id) {
+        const pct = (t.monthlyRevenue / newTarget) * 100;
+        const status = pct >= 110 ? 'Over Target' : pct >= 95 ? 'On Track' : 'Action Needed';
+        return { ...t, monthlyTarget: newTarget, status };
+      }
+      return t;
+    });
+    setEditTenants(updated as TenantRecordDto[]);
+    setHasLocalEdits(true);
     setSelectedTenant(null);
   };
 
-  const syncButtonTitle = !canSync
-    ? 'Izin terbatas: Peran Anda tidak memiliki capability write:revenue'
-    : sobatStatus && !sobatStatus.configured
-      ? 'Sobat API belum dikonfigurasi di environment'
-      : 'Tarik pembaruan data tenant dari Sobat API';
-
   return (
     <div className="space-y-6 animate-fade-in-up relative">
-      {/* Toast Notification */}
-      {toastMsg && (
-        <div className="fixed top-20 right-6 z-50 flex items-center gap-2 rounded-card-lg bg-navy text-white px-4 py-3 shadow-2xl border border-primary/30 animate-fade-in-down text-xs font-semibold">
-          <CheckCircle className="h-4 w-4 text-success" />
-          <span>{toastMsg}</span>
-        </div>
-      )}
-
       {/* Header Banner */}
       <section className="relative overflow-hidden rounded-card-lg border border-line/40 bg-gradient-to-r from-navy via-[#1e293b] to-navy p-6 text-white shadow-lg">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -130,31 +93,16 @@ export default function TenantRevenuePage() {
               {isBod ? 'Analisis Kontribusi Omset Tenant 7 Divisi' : `Data Performa Outlet Tenant Khusus Divisi ${userDivision}`}
             </p>
           </div>
-          <div className="flex flex-col items-start md:items-end gap-2">
-            <div className="flex flex-wrap items-center gap-3">
-              <Button
-                onClick={handleSyncTenants}
-                disabled={syncMutation.isPending || !canSync}
-                title={syncButtonTitle}
-                className={`text-xs shadow-md ${
-                  !canSync
-                    ? 'bg-slate-600 text-slate-300 cursor-not-allowed opacity-60'
-                    : 'bg-success hover:bg-success-dark text-white'
-                }`}
-              >
-                <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${syncMutation.isPending ? 'animate-spin' : ''}`} />
-                {syncMutation.isPending ? 'Memproses Sync...' : '⚡ Tarik Data Tenant (Sobat API)'}
-              </Button>
-              <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border-white/20 text-xs">
-                <Download className="mr-1.5 h-3.5 w-3.5" /> Download Laporan Tenant
-              </Button>
-            </div>
-            {!canSync && (
-              <div className="flex items-center gap-1 text-[11px] text-amber-300 font-medium">
-                <Lock className="h-3 w-3" />
-                <span>Sync dinonaktifkan: akun view-only (tanpa izin write:revenue)</span>
+          <div className="flex flex-wrap items-center gap-3">
+            {isLoading && (
+              <div className="inline-flex items-center gap-2 rounded-pill bg-white/10 px-3 py-1.5 text-xs text-white/80 font-medium">
+                <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                Memuat data tenant...
               </div>
             )}
+            <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border-white/20 text-xs">
+              <Download className="mr-1.5 h-3.5 w-3.5" /> Download Laporan Tenant
+            </Button>
           </div>
         </div>
       </section>
@@ -170,32 +118,12 @@ export default function TenantRevenuePage() {
         </section>
       )}
 
-      {/* Sync Error with Retry Banner */}
-      {syncError && (
+      {/* Sync Error Banner */}
+      {isError && (
         <section className="rounded-card-lg border border-danger/30 bg-danger-light/60 p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs text-danger font-semibold animate-fade-in">
           <div className="flex items-center gap-2">
             <AlertCircle className="h-4 w-4 shrink-0 text-danger" />
-            <span>Gagal Sinkronisasi: {syncError}</span>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            {canSync && (
-              <Button
-                size="sm"
-                onClick={handleSyncTenants}
-                disabled={syncMutation.isPending}
-                className="bg-danger hover:bg-danger-dark text-white text-xs px-3 py-1 border-none shadow-sm"
-              >
-                <RefreshCw className={`mr-1 h-3 w-3 ${syncMutation.isPending ? 'animate-spin' : ''}`} />
-                Coba Lagi
-              </Button>
-            )}
-            <button
-              onClick={() => setSyncError(null)}
-              className="text-slate-400 hover:text-slate-600 p-1"
-              title="Tutup pemberitahuan error"
-            >
-              <XCircle className="h-4 w-4" />
-            </button>
+            <span>Gagal memuat data tenant: {error?.message ?? 'Terjadi kesalahan saat menghubungi Sobat API.'}</span>
           </div>
         </section>
       )}
@@ -343,6 +271,15 @@ export default function TenantRevenuePage() {
                     </tr>
                   );
                 })
+              ) : isLoading ? (
+                <tr>
+                  <td colSpan={8} className="px-4 py-12 text-center">
+                    <div className="flex flex-col items-center gap-2 text-slate-400">
+                      <RefreshCw className="h-6 w-6 animate-spin" />
+                      <span className="text-xs">Memuat data tenant dari Sobat API...</span>
+                    </div>
+                  </td>
+                </tr>
               ) : (
                 <tr>
                   <td colSpan={8} className="px-4 py-8 text-center text-xs text-slate-400">

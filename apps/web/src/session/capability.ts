@@ -1,11 +1,12 @@
 import type { Role } from '../mocks/session';
 
 const ROLE_CAPABILITIES: Record<string, string[]> = {
-  BOD: ['*'],
+  BOD: ['view:division', 'view:report', 'view:workforce'],
   MANAGER: ['view:division', 'manage:division', 'view:report', 'write:target', 'write:assessment', 'write:revenue'],
   ADMIN: ['view:division', 'write:revenue', 'write:target', 'view:report'],
   SUPERADMIN: ['*', 'manage:config'],
   HRD: ['view:workforce', 'manage:workforce'],
+  PIC: ['view:own'],
   USER: ['view:own'],
 };
 

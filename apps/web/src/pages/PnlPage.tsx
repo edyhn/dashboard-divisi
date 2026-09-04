@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { PieChart, TrendingUp, DollarSign, Award, ArrowUpRight, CheckCircle2, Printer } from 'lucide-react';
 import { Button } from '../components/ui/Button';
+import { PnlComparisonChart } from '../components/pnl/PnlComparisonChart';
+import { useAuth } from '../session/AuthContext';
 
 interface PnlItem {
   id: string;
@@ -21,6 +23,9 @@ const INITIAL_PNL: PnlItem[] = [
 ];
 
 export default function PnlPage() {
+  const { user } = useAuth();
+  const isBod = user?.role === 'BOD';
+
   const [pnlItems] = useState<PnlItem[]>(INITIAL_PNL);
 
   const totalRevenue = pnlItems.filter(i => i.section === 'Revenue').reduce((a, b) => a + b.amount, 0);
@@ -110,6 +115,9 @@ export default function PnlPage() {
           <p className="mt-1 text-xs text-slate-500">Target Q3 Reached</p>
         </article>
       </section>
+
+      {/* Comparison Chart (BOD Only) */}
+      {isBod && <PnlComparisonChart />}
 
       {/* PnL Statement Table */}
       <section className="rounded-card-lg border border-line/40 bg-white/80 backdrop-blur-md p-6 shadow-sm print:border-none print:p-0">

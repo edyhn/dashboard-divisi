@@ -145,7 +145,7 @@ class SobatIntegrationTest extends TestCase
         Config::set('services.sobathr.company_id', 'CMP_001');
 
         Http::fake([
-            'https://api.sobat.test/v1/tenants*' => Http::response([
+            'https://api.sobat.test/v1/*' => Http::response([
                 'data' => [
                     [
                         'id' => 'TNT-001',
@@ -214,7 +214,7 @@ class SobatIntegrationTest extends TestCase
         Http::assertSent(function ($request) {
             return $request->hasHeader('Authorization', 'Bearer secret_token_abc')
                 && $request->hasHeader('X-Company-ID', 'CMP_001')
-                && str_starts_with($request->url(), 'https://api.sobat.test/v1/tenants');
+                && str_starts_with($request->url(), 'https://api.sobat.test/v1/');
         });
     }
 
@@ -225,7 +225,7 @@ class SobatIntegrationTest extends TestCase
         Config::set('services.sobathr.company_id', 'CMP_001');
 
         Http::fake([
-            'https://api.sobat.test/v1/tenants*' => Http::response([
+            'https://api.sobat.test/v1/*' => Http::response([
                 'data' => [
                     [
                         'id' => 'TNT-001',
@@ -264,7 +264,7 @@ class SobatIntegrationTest extends TestCase
         Config::set('services.sobathr.company_id', 'CMP_001');
 
         Http::fake([
-            'https://api.sobat.test/v1/tenants*' => Http::response([
+            'https://api.sobat.test/v1/*' => Http::response([
                 'error' => 'Internal Server Error on Sobat HR',
             ], 500),
         ]);
@@ -284,7 +284,7 @@ class SobatIntegrationTest extends TestCase
         Config::set('services.sobathr.company_id', 'CMP_001');
 
         Http::fake([
-            'https://api.sobat.test/v1/tenants*' => function () {
+            'https://api.sobat.test/v1/*' => function () {
                 throw new ConnectionException('Connection timed out');
             },
         ]);
@@ -305,7 +305,7 @@ class SobatIntegrationTest extends TestCase
 
         // Upstream mengembalikan response tanpa ID atau missing numeric target/revenue
         Http::fake([
-            'https://api.sobat.test/v1/tenants*' => Http::response([
+            'https://api.sobat.test/v1/*' => Http::response([
                 'data' => [
                     [
                         'id' => '',

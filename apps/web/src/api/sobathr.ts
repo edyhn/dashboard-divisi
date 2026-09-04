@@ -34,7 +34,7 @@ export interface SobatSyncResultDto {
 }
 
 export const sobathrApi = {
-  getStatus: () => api.get<SobatStatusDto>('/v1/sobathr/status'),
+  getStatus: () => api.get<SobatStatusDto>('/sobathr/status'),
   syncTenants: (divisionCode?: string) =>
-    api.post<SobatSyncResultDto>('/v1/sobathr/sync-tenants', divisionCode ? { division_code: divisionCode } : {}),
+    api.post<SobatSyncResultDto>('/sobathr/sync-tenants', divisionCode ? { division_code: divisionCode } : {}),
 };

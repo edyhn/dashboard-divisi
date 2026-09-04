@@ -3,6 +3,7 @@ import { Calculator, DollarSign, PieChart, TrendingDown, Edit2, Download, CheckC
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { useAuth } from '../session/AuthContext';
+import { hasCapability } from '../session/capability';
 
 interface BudgetItem {
   id: string;
@@ -23,7 +24,7 @@ const INITIAL_BUDGETS: BudgetItem[] = [
 
 export default function BudgetingPage() {
   const { user } = useAuth();
-  const isPicViewOnly = user?.role === 'PIC' || user?.role === 'USER';
+  const isPicViewOnly = !hasCapability(user?.role as never, 'write:target');
 
   const [budgets, setBudgets] = useState<BudgetItem[]>(INITIAL_BUDGETS);
   const [selectedItem, setSelectedItem] = useState<BudgetItem | null>(null);
