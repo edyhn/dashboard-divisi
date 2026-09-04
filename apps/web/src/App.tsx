@@ -8,26 +8,20 @@ import { LoadingState } from './components/states';
 import { ToastProvider } from './components/ui/Toast';
 import { AppLayout } from './layout/AppLayout';
 import { AuthProvider, useAuth } from './session/AuthContext';
-import { SessionProvider, useSession } from './session/SessionContext';
-import { homePathForRole } from './mocks/session';
 
-// SOP 1B: Pages lazy — DILARANG eager import (anti-pattern). SOP 5: ErrorBoundary per-route + Suspense.
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
-const DemoStatesPage = lazy(() => import('./pages/DemoStatesPage'));
-const KaryawanPage = lazy(() => import('./pages/KaryawanPage'));
-const KonfigurasiPage = lazy(() => import('./pages/KonfigurasiPage'));
 const LaporanPage = lazy(() => import('./pages/LaporanPage'));
-const OmzetPage = lazy(() => import('./pages/OmzetPage'));
-const PenilaianPage = lazy(() => import('./pages/PenilaianPage'));
-const ProfilPage = lazy(() => import('./pages/ProfilPage'));
-const TargetPage = lazy(() => import('./pages/TargetPage'));
-const WorkforcePage = lazy(() => import('./pages/WorkforcePage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
+const DailyReportPage = lazy(() => import('./pages/DailyReportPage'));
+const TenantRevenuePage = lazy(() => import('./pages/TenantRevenuePage'));
+const BudgetingPage = lazy(() => import('./pages/BudgetingPage'));
+const CashflowPage = lazy(() => import('./pages/CashflowPage'));
+const PnlPage = lazy(() => import('./pages/PnlPage'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 menit — anti refetch storm
+      staleTime: 5 * 60 * 1000,
       refetchOnWindowFocus: false,
       retry: 1,
     },
@@ -38,12 +32,7 @@ function HomeRedirect() {
   const { user, loading } = useAuth();
   if (loading) return <div className="p-6 text-sm text-slate-500">Memuat sesi...</div>;
   if (!user) return <Navigate to="/login" replace />;
-  return <Navigate to={homePathForRole(user.role as never)} replace />;
-}
-
-function AuthHomeRedirect() {
-  const { user } = useSession();
-  return <Navigate to={homePathForRole(user.role)} replace />;
+  return <Navigate to="/dashboard" replace />;
 }
 
 function RouteSuspense({ children }: { children: React.ReactNode }) {
@@ -60,113 +49,85 @@ export default function App() {
       <ToastProvider>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <SessionProvider>
-              <BrowserRouter>
+            <BrowserRouter>
               <Routes>
                 <Route path="/login" element={<RouteSuspense><LoginPage /></RouteSuspense>} />
                 <Route element={<AppLayout />}>
                   <Route path="/" element={<HomeRedirect />} />
-                  <Route path="/legacy" element={<AuthHomeRedirect />} />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <RouteGuard capability="view:division">
-                      <RouteSuspense>
-                        <DashboardPage />
-                      </RouteSuspense>
-                    </RouteGuard>
-                  }
-                />
-                <Route
-                  path="/omzet"
-                  element={
-                    <RouteGuard capability="write:revenue">
-                      <RouteSuspense>
-                        <OmzetPage />
-                      </RouteSuspense>
-                    </RouteGuard>
-                  }
-                />
-                <Route
-                  path="/target"
-                  element={
-                    <RouteGuard capability="write:target">
-                      <RouteSuspense>
-                        <TargetPage />
-                      </RouteSuspense>
-                    </RouteGuard>
-                  }
-                />
-                <Route
-                  path="/penilaian"
-                  element={
-                    <RouteGuard capability="write:assessment">
-                      <RouteSuspense>
-                        <PenilaianPage />
-                      </RouteSuspense>
-                    </RouteGuard>
-                  }
-                />
-                <Route
-                  path="/karyawan"
-                  element={
-                    <RouteGuard capability="view:workforce">
-                      <RouteSuspense>
-                        <KaryawanPage />
-                      </RouteSuspense>
-                    </RouteGuard>
-                  }
-                />
-                <Route
-                  path="/workforce"
-                  element={
-                    <RouteGuard capability="view:workforce">
-                      <RouteSuspense>
-                        <WorkforcePage />
-                      </RouteSuspense>
-                    </RouteGuard>
-                  }
-                />
-                <Route
-                  path="/laporan"
-                  element={
-                    <RouteGuard capability="view:report">
-                      <RouteSuspense>
-                        <LaporanPage />
-                      </RouteSuspense>
-                    </RouteGuard>
-                  }
-                />
-                <Route
-                  path="/konfigurasi"
-                  element={
-                    <RouteGuard capability="manage:config">
-                      <RouteSuspense>
-                        <KonfigurasiPage />
-                      </RouteSuspense>
-                    </RouteGuard>
-                  }
-                />
-                <Route
-                  path="/profil"
-                  element={
-                    <RouteSuspense>
-                      <ProfilPage />
-                    </RouteSuspense>
-                  }
-                />
-                <Route
-                  path="/demo"
-                  element={
-                    <RouteSuspense>
-                      <DemoStatesPage />
-                    </RouteSuspense>
-                  }
-                />
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <RouteGuard>
+                        <RouteSuspense>
+                          <DashboardPage />
+                        </RouteSuspense>
+                      </RouteGuard>
+                    }
+                  />
+                  <Route
+                    path="/laporan-harian"
+                    element={
+                      <RouteGuard>
+                        <RouteSuspense>
+                          <DailyReportPage />
+                        </RouteSuspense>
+                      </RouteGuard>
+                    }
+                  />
+                  <Route
+                    path="/rincian-tenant"
+                    element={
+                      <RouteGuard>
+                        <RouteSuspense>
+                          <TenantRevenuePage />
+                        </RouteSuspense>
+                      </RouteGuard>
+                    }
+                  />
+                  <Route
+                    path="/laporan"
+                    element={
+                      <RouteGuard>
+                        <RouteSuspense>
+                          <LaporanPage />
+                        </RouteSuspense>
+                      </RouteGuard>
+                    }
+                  />
+                  <Route
+                    path="/budgeting"
+                    element={
+                      <RouteGuard>
+                        <RouteSuspense>
+                          <BudgetingPage />
+                        </RouteSuspense>
+                      </RouteGuard>
+                    }
+                  />
+                  <Route
+                    path="/cashflow"
+                    element={
+                      <RouteGuard>
+                        <RouteSuspense>
+                          <CashflowPage />
+                        </RouteSuspense>
+                      </RouteGuard>
+                    }
+                  />
+                  <Route
+                    path="/pnl"
+                    element={
+                      <RouteGuard>
+                        <RouteSuspense>
+                          <PnlPage />
+                        </RouteSuspense>
+                      </RouteGuard>
+                    }
+                  />
                 </Route>
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
               </Routes>
-              </BrowserRouter>
-            </SessionProvider>
+            </BrowserRouter>
           </AuthProvider>
         </QueryClientProvider>
       </ToastProvider>

@@ -3,7 +3,6 @@ import type { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { EmptyState, NoAccessState } from './states';
 import { useAuth } from '../session/AuthContext';
-import { useSession } from '../session/SessionContext';
 import { hasCapability, canAccessDivision } from '../session/capability';
 
 interface RouteGuardProps {
@@ -14,19 +13,7 @@ interface RouteGuardProps {
 }
 
 export function RouteGuard({ children, capability, divisionCode, fallback }: RouteGuardProps) {
-  let authUser: ReturnType<typeof useAuth>['user'] | null = null;
-  let authLoading = false;
-  try {
-    const a = useAuth();
-    authUser = a.user;
-    authLoading = a.loading;
-  } catch {}
-  let sessionUser: ReturnType<typeof useSession>['user'] | null = null;
-  try {
-    const s = useSession();
-    sessionUser = s.user;
-  } catch {}
-  const user = authUser ?? (sessionUser as unknown as typeof authUser);
+  const { user, loading: authLoading } = useAuth();
 
   if (authLoading) return <EmptyState title="Memuat sesi..." description="Menunggu verifikasi token" />;
   if (!user) return <Navigate to="/login" replace />;

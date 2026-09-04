@@ -1,181 +1,231 @@
-import { TrendingUp, Users, Target, Award, ArrowUpRight } from 'lucide-react';
-import { StatusPill } from '../components/StatusPill';
-import { EmptyState, ErrorState, LoadingState } from '../components/states';
-import { OrgFilters } from '../components/filters/OrgFilters';
-import { roleDisplay } from '../mocks/session';
+import { useState } from 'react';
+import { ChevronRight, Lock, Clock, CheckCircle2, Plus, Check } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../session/AuthContext';
-import { useBodOverview } from '../hooks/useBod';
-import { useOrgFilters } from '../components/filters/OrgFilters';
-
-function formatScope(role: string | undefined, divisionCode: string | null | undefined) {
-  const label = roleDisplay(role ?? '');
-  if (!divisionCode) return `${label} · semua divisi`;
-  return `${label} · ${divisionCode}`;
-}
+import { roleDisplay } from '../mocks/session';
+import { Button } from '../components/ui/Button';
+import BodExecutiveDashboard from '../components/dashboard/BodExecutiveDashboard';
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const { data, isLoading, error, refetch } = useBodOverview();
-  const { divisionCode } = useOrgFilters();
+  const role = user?.role ?? 'USER';
+  const isBod = role === 'BOD';
+  const isManager = role === 'MANAGER' || role === 'SUPERADMIN';
+  const isAdmin = role === 'ADMIN';
+  const isPicViewOnly = role === 'PIC' || role === 'USER';
 
-  if (isLoading) return <LoadingState label="Memuat overview BOD..." />;
-  if (error) {
-    const e = error as unknown as { message?: string; traceId?: string; status?: number };
-    return <ErrorState description={e.message ?? 'Gagal memuat overview'} traceId={e.traceId} onRetry={() => void refetch()} />;
-  }
-  if (!data || data.length === 0) return <EmptyState title="Belum ada data" description="Overview kosong — seed 7 divisi belum tersedia." />;
+  const userDivision = user?.divisionCode;
 
-  const filtered = divisionCode ? data.filter((d) => d.divisionCode === divisionCode) : data;
+  // State antrean ACC untuk Manager
+  const [pendingApprovals, setPendingApprovals] = useState([
+    { id: '1', division: 'WRAP', name: 'Wrapping', revenue: 45000000, date: '2026-09-03', admin: 'Admin Wrapping' },
+    { id: '4', division: 'MINI', name: 'Minimarket', revenue: 65000000, date: '2026-09-03', admin: 'Admin Minimarket' },
+    { id: '6', division: 'FIN', name: 'Finance', revenue: 150000000, date: '2026-09-03', admin: 'Admin Finance' },
+  ]);
 
-  const metrics = [
-    { label: 'Divisi Aktif', value: String(filtered.length), delta: '7 total', tone: 'text-primary', icon: Target, bg: 'bg-primary-light', color: 'text-primary' },
-    { label: 'Avg Achievement', value: `${Math.round(filtered.reduce((a, d) => a + (d.target.achievement ?? 0), 0) / Math.max(filtered.length,1))}%`, delta: 'Target', tone: 'text-success', icon: TrendingUp, bg: 'bg-success-light', color: 'text-success' },
-    { label: 'MC Forex', value: filtered.find((d) => d.divisionCode === 'MC') ? 'Aktif' : '-', delta: 'forex.volume', tone: 'text-info', icon: Award, bg: 'bg-info/10', color: 'text-info' },
-    { label: 'Workforce', value: String(filtered.reduce((a, d) => a + (d.workforce.count ?? 0), 0)), delta: 'Total count', tone: 'text-navy', icon: Users, bg: 'bg-surface-2', color: 'text-navy' },
-  ];
+  const filteredPending = pendingApprovals.filter(a => {
+    if (isBod || !userDivision) return true;
+    return a.division === userDivision;
+  });
 
-  const rankings = [...filtered]
-    .sort((a, b) => (b.target.achievement ?? 0) - (a.target.achievement ?? 0))
-    .slice(0, 5)
-    .map((d) => ({
-      outlet: `${d.divisionCode}-001`,
-      division: d.divisionName,
-      revenue: d.revenue.gross != null ? `Rp ${d.revenue.gross}` : '—',
-      achievement: `${d.target.achievement ?? 0}%`,
-      status: d.target.achievement >= 100 ? 'Over target' : d.target.achievement >= 85 ? 'Monitor' : 'Action needed',
-    }));
-
-  const trend = filtered.slice(0, 7).map((d) => (d.target.achievement ?? 0) + 50);
-  const maxTrend = Math.max(...trend, 1);
+  const handleQuickApprove = (id: string) => {
+    setPendingApprovals(pendingApprovals.filter(a => a.id !== id));
+  };
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-card-lg border border-line/60 bg-gradient-to-br from-white to-surface p-6 shadow-card">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    <div className="space-y-6 animate-fade-in-up">
+      {/* Header Welcome Banner */}
+      <section className="relative overflow-hidden rounded-card-lg border border-line/40 bg-gradient-to-r from-navy via-[#1e293b] to-navy p-6 text-white shadow-lg">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-pill bg-primary px-3 py-1 text-xs font-medium text-white">● Real BE</div>
-            <h1 className="mt-2 text-2xl lg:text-3xl font-bold tracking-tight text-navy">Ringkasan performa operasional</h1>
-            <p className="mt-2 text-sm text-slate-500">{formatScope(user?.role, user?.divisionCode)} · periode berjalan · <span className="font-mono text-xs bg-surface px-1.5 py-0.5 rounded">trace_id</span> envelope</p>
+            <div className="inline-flex items-center gap-2 rounded-pill bg-white/10 px-3 py-1 text-xs font-semibold text-primary-light backdrop-blur-md">
+              <span> Dashboard Terpersonalisasi ({roleDisplay(role)})</span>
+            </div>
+            <h1 className="mt-2 text-2xl md:text-3xl font-extrabold tracking-tight">
+              Selamat Datang, {user?.name ?? 'Pengguna'}
+            </h1>
+            <p className="mt-1 text-sm text-slate-300">
+              Scope Operasional: <span className="font-semibold text-white">{user?.divisionCode ?? 'Semua Divisi (7 Divisi)'}</span>
+            </p>
           </div>
-          <div className="flex items-center gap-2 rounded-card-lg bg-success-light border border-success/20 px-4 py-3 text-sm">
-            <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
-            <span className="font-medium text-success">Sinkron real-time</span>
-            <span className="text-success/70">· {filtered.length} divisi</span>
+
+          <div className="flex items-center gap-3">
+            {isBod && (
+              <span className="inline-flex items-center gap-1.5 rounded-pill bg-primary/20 border border-primary/30 px-3.5 py-1.5 text-xs font-semibold text-primary-light">
+                👔 Panel Executive BOD
+              </span>
+            )}
+            {isManager && (
+              <span className="inline-flex items-center gap-1.5 rounded-pill bg-success/20 border border-success/30 px-3.5 py-1.5 text-xs font-semibold text-success-light">
+                ⚡ Panel Approval Manager
+              </span>
+            )}
+            {isAdmin && (
+              <span className="inline-flex items-center gap-1.5 rounded-pill bg-info/20 border border-info/30 px-3.5 py-1.5 text-xs font-semibold text-info-light">
+                📝 Panel Input Admin Divisi
+              </span>
+            )}
+            {isPicViewOnly && (
+              <span className="inline-flex items-center gap-1.5 rounded-pill bg-warning/20 border border-warning/30 px-3.5 py-1.5 text-xs font-semibold text-warning-light">
+                <Lock className="h-3.5 w-3.5" /> Panel Monitor PIC (View Only)
+              </span>
+            )}
           </div>
         </div>
-        <div className="mt-6"><OrgFilters /></div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {metrics.map((m) => {
-          const Icon = m.icon;
-          return (
-            <article key={m.label} className="group rounded-card-lg border border-line/60 bg-white p-5 shadow-card hover:shadow-card-hover hover:-translate-y-0.5 transition-all">
-              <div className="flex items-start justify-between">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-card-lg ${m.bg} ${m.color}`}><Icon className="h-5 w-5" /></div>
-                <ArrowUpRight className="h-4 w-4 text-slate-300 group-hover:text-slate-400 transition-colors" />
+      {/* ==================== VIEW ROLE 1: EXECUTIVE (BOD) ==================== */}
+      {isBod && (
+        <BodExecutiveDashboard />
+      )}
+
+      {/* ==================== VIEW ROLE 2: MANAGER (SUPERADMIN) ==================== */}
+      {isManager && (
+        <div className="space-y-6">
+          {/* Approval Queue Widget */}
+          <section className="rounded-card-lg border border-warning/30 bg-gradient-to-br from-warning/10 to-white backdrop-blur-md p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-bold text-navy flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-warning" /> Manager Approval Center (Pending ACC)
+                </h2>
+                <p className="text-xs text-slate-500 mt-1">Crosscheck dan setujui laporan yang di-submit oleh Admin Divisi</p>
               </div>
-              <p className="mt-4 text-sm font-medium text-slate-500">{m.label}</p>
-              <p className="mt-1 text-2xl lg:text-3xl font-bold tracking-tight text-navy">{m.value}</p>
-              <p className={`mt-1 text-xs font-medium ${m.tone}`}>{m.delta}</p>
-            </article>
-          );
-        })}
-      </section>
+              <span className="rounded-pill bg-warning px-3 py-1 text-xs font-bold text-white shadow-sm">
+                {filteredPending.length} Perlu Verifikasi
+              </span>
+            </div>
 
-      <section className="rounded-card-lg border border-line/60 bg-white p-6 shadow-card">
-        <h2 className="text-base font-semibold text-navy">Kesehatan data</h2>
-        <p className="text-sm text-slate-500">Real BE — freshness per divisi dari overview.</p>
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
-          {filtered.slice(0, 3).map((d) => (
-            <div key={d.divisionCode} className="rounded-card-lg border border-line/60 p-4 hover:bg-surface/50 transition-colors">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-navy">{d.divisionCode}</p>
-                <span className="h-2 w-2 rounded-full bg-success/60" />
+            {filteredPending.length > 0 ? (
+              <div className="mt-4 space-y-3">
+                {filteredPending.map((item) => (
+                  <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between rounded-card-lg border border-line/60 bg-white p-4 gap-3">
+                    <div>
+                      <span className="rounded-pill bg-navy/10 px-2.5 py-0.5 text-xs font-bold text-navy">{item.division} - {item.name}</span>
+                      <p className="mt-1 text-sm font-bold text-navy">Omset Input: Rp {item.revenue.toLocaleString('id-ID')}</p>
+                      <p className="text-xs text-slate-500">Disubmit oleh {item.admin} pada {item.date}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button size="sm" onClick={() => handleQuickApprove(item.id)} className="bg-success hover:bg-success-dark text-white text-xs">
+                        <Check className="mr-1 h-3.5 w-3.5" /> Setujui (ACC)
+                      </Button>
+                      <Link to="/laporan-harian">
+                        <Button size="sm" variant="secondary" className="text-xs">Detail</Button>
+                      </Link>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <p className="mt-1 text-xs font-mono text-slate-500">{d.revenue.source}</p>
-              <p className="mt-1 text-xs text-slate-400">{new Date(d.revenue.freshness).toLocaleDateString('id-ID')}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
-        <article className="rounded-card-lg border border-line/60 bg-white p-6 shadow-card">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-base font-semibold text-navy">Trend achievement</h2>
-              <p className="text-sm text-slate-500">Per divisi · dari BOD overview</p>
-            </div>
-            <span className="rounded-pill bg-success-light px-3 py-1 text-xs font-semibold text-success border border-success/20">Real data</span>
-          </div>
-          <div className="mt-6 flex h-48 items-end gap-2" role="img" aria-label="Trend achievement per divisi">
-            {trend.map((v, i) => (
-              <div key={i} className="flex flex-1 flex-col items-center gap-2 group">
-                <div className="w-full rounded-t-card bg-gradient-to-t from-primary to-primary-dark group-hover:from-primary-dark group-hover:to-primary transition-all" style={{ height: `${(v / maxTrend) * 100}%` }} />
-                <span className="text-xs font-medium text-slate-500">{filtered[i]?.divisionCode ?? `W${i + 1}`}</span>
+            ) : (
+              <div className="mt-4 rounded-card-lg border border-success/20 bg-success-light/30 p-4 text-center">
+                <CheckCircle2 className="mx-auto h-6 w-6 text-success" />
+                <p className="mt-1 text-sm font-bold text-success">Semua Laporan Divisi Telah Di-ACC</p>
               </div>
-            ))}
-          </div>
-        </article>
-        <article className="rounded-card-lg border border-line/60 bg-white p-6 shadow-card">
-          <h2 className="text-base font-semibold text-navy">Ringkasan tindakan</h2>
-          <div className="mt-4 space-y-3">
-            <div className="rounded-card-lg border border-line/60 p-4 bg-surface/30">
-              <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Periode</p>
-              <p className="mt-1 font-semibold text-navy">{filtered[0]?.period.from} → {filtered[0]?.period.to}</p>
-            </div>
-            <div className="rounded-card-lg border border-line/60 p-4">
-              <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Freshness</p>
-              <p className="mt-1 text-sm font-semibold text-success flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-success animate-pulse" />BOD overview real</p>
-            </div>
-          </div>
-        </article>
-      </section>
+            )}
+          </section>
 
-      <section className="rounded-card-lg border border-line/60 bg-white p-6 shadow-card">
-        <h2 className="text-base font-semibold text-navy">Drill-down action</h2>
-        <p className="text-sm text-slate-500">Aksi cepat dari overview real.</p>
-        <div className="mt-4 flex gap-2">
-          <button type="button" className="rounded-input bg-navy px-4 py-2 text-sm font-medium text-white hover:bg-navy-light transition-colors">Buka action center</button>
-          <button type="button" className="rounded-input border border-line bg-white px-4 py-2 text-sm font-medium text-navy hover:bg-surface transition-colors">Lihat detail</button>
+          {/* Shortcut Pengelolaan Manager */}
+          <div className="grid gap-4 md:grid-cols-3">
+            <Link to="/laporan-harian" className="rounded-card-lg border border-line p-5 bg-white shadow-sm hover:border-primary transition-all">
+              <h3 className="font-bold text-navy">Report Harian & ACC</h3>
+              <p className="text-xs text-slate-500 mt-1">Kelola verifikasi omset harian divisi</p>
+            </Link>
+            <Link to="/rincian-tenant" className="rounded-card-lg border border-line p-5 bg-white shadow-sm hover:border-primary transition-all">
+              <h3 className="font-bold text-navy">Target Tenant</h3>
+              <p className="text-xs text-slate-500 mt-1">Ubah target bulanan tenant/outlet</p>
+            </Link>
+            <Link to="/budgeting" className="rounded-card-lg border border-line p-5 bg-white shadow-sm hover:border-primary transition-all">
+              <h3 className="font-bold text-navy">Format Budgeting</h3>
+              <p className="text-xs text-slate-500 mt-1">Alokasi & pengawasan anggaran</p>
+            </Link>
+          </div>
         </div>
-      </section>
+      )}
 
-      <section className="rounded-card-lg border border-line/60 bg-white p-6 shadow-card">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-semibold text-navy">Ranking outlet</h2>
-            <p className="text-sm text-slate-500">Diurutkan achievement · real dari overview</p>
+      {/* ==================== VIEW ROLE 3: ADMIN ==================== */}
+      {isAdmin && (
+        <div className="space-y-6">
+          <section className="rounded-card-lg border border-primary/20 bg-gradient-to-br from-primary/5 to-white backdrop-blur-md p-6 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-bold text-navy">Panel Input Admin Divisi</h2>
+                <p className="text-xs text-slate-500 mt-1">Catat omset harian divisi Anda. Data akan terkirim ke Manager untuk di-ACC.</p>
+              </div>
+              <Link to="/laporan-harian">
+                <Button className="bg-primary text-white text-xs">
+                  <Plus className="mr-1.5 h-4 w-4" /> Input Omset Hari Ini
+                </Button>
+              </Link>
+            </div>
+          </section>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <Link to="/laporan-harian" className="rounded-card-lg border border-line p-5 bg-white shadow-sm hover:border-primary transition-all">
+              <h3 className="font-bold text-navy">Log Input Omset Harian</h3>
+              <p className="text-xs text-slate-500 mt-1">Pantau status laporan (Pending ACC / Approved)</p>
+            </Link>
+            <Link to="/rincian-tenant" className="rounded-card-lg border border-line p-5 bg-white shadow-sm hover:border-primary transition-all">
+              <h3 className="font-bold text-navy">Data Tenant Outlet</h3>
+              <p className="text-xs text-slate-500 mt-1">Lihat rincian pencapaian tenant divisi</p>
+            </Link>
           </div>
-          <span className="text-xs font-mono text-slate-400">trace_id</span>
         </div>
-        <div className="mt-4 overflow-x-auto rounded-card-lg border border-line/60">
-          <table className="min-w-[720px] w-full text-left text-sm">
-            <caption className="sr-only">Ranking outlet</caption>
-            <thead className="bg-surface text-slate-500">
-              <tr>
-                <th scope="col" className="px-4 py-3 font-medium">Outlet</th>
-                <th scope="col" className="px-4 py-3 font-medium">Divisi</th>
-                <th scope="col" className="px-4 py-3 font-medium">Omzet</th>
-                <th scope="col" className="px-4 py-3 font-medium">Achievement</th>
-                <th scope="col" className="px-4 py-3 font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line/60">
-              {rankings.map((row) => (
-                <tr key={row.outlet} className="hover:bg-surface/50 transition-colors">
-                  <td className="px-4 py-3 font-semibold text-navy">{row.outlet}</td>
-                  <td className="px-4 py-3 text-slate-600">{row.division}</td>
-                  <td className="px-4 py-3 text-slate-600 font-mono text-xs">{row.revenue}</td>
-                  <td className="px-4 py-3 text-slate-600">{row.achievement}</td>
-                  <td className="px-4 py-3"><StatusPill status={row.status} /></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      )}
+
+      {/* ==================== VIEW ROLE 4: PIC (VIEW ONLY) ==================== */}
+      {isPicViewOnly && (
+        <div className="space-y-6">
+          <section className="rounded-card-lg border border-warning/30 bg-warning-light/30 p-4">
+            <div className="flex items-center gap-2">
+              <Lock className="h-4 w-4 text-warning" />
+              <p className="text-xs font-semibold text-warning">
+                Mode Akses PIC (Read-Only) — Pengisian data dilakukan oleh Admin Divisi dan di-ACC oleh Manager Divisi.
+              </p>
+            </div>
+          </section>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <Link to="/laporan-harian" className="rounded-card-lg border border-line p-5 bg-white shadow-sm hover:border-primary transition-all">
+              <h3 className="font-bold text-navy">Laporan Harian Divisi</h3>
+              <p className="text-xs text-slate-500 mt-1">Lihat perkembangan omset harian divisi</p>
+            </Link>
+            <Link to="/rincian-tenant" className="rounded-card-lg border border-line p-5 bg-white shadow-sm hover:border-primary transition-all">
+              <h3 className="font-bold text-navy">Rincian Tenant</h3>
+              <p className="text-xs text-slate-500 mt-1">Lihat pencapaian omset per tenant</p>
+            </Link>
           </div>
-          <p className="mt-2 text-xs text-slate-400 lg:hidden">Geser → untuk lihat kolom</p>
+        </div>
+      )}
+
+      {/* Navigation Shortcut Cards untuk Semua Role */}
+      <section className="rounded-card-lg border border-line/40 bg-white/80 backdrop-blur-md p-6 shadow-sm">
+        <h2 className="text-base font-bold text-navy mb-4">Navigasi Cepat Modul Laporan</h2>
+        <div className="grid gap-3 md:grid-cols-3">
+          <Link to="/laporan-harian" className="rounded-card border border-line/60 p-3 bg-surface/30 hover:bg-white transition-colors flex items-center justify-between">
+            <span className="text-xs font-bold text-navy">Report Harian</span>
+            <ChevronRight className="h-4 w-4 text-slate-400" />
+          </Link>
+          <Link to="/rincian-tenant" className="rounded-card border border-line/60 p-3 bg-surface/30 hover:bg-white transition-colors flex items-center justify-between">
+            <span className="text-xs font-bold text-navy">Rincian Omset Tenant</span>
+            <ChevronRight className="h-4 w-4 text-slate-400" />
+          </Link>
+          <Link to="/laporan" className="rounded-card border border-line/60 p-3 bg-surface/30 hover:bg-white transition-colors flex items-center justify-between">
+            <span className="text-xs font-bold text-navy">Detail Laporan</span>
+            <ChevronRight className="h-4 w-4 text-slate-400" />
+          </Link>
+          <Link to="/budgeting" className="rounded-card border border-line/60 p-3 bg-surface/30 hover:bg-white transition-colors flex items-center justify-between">
+            <span className="text-xs font-bold text-navy">Format Budgeting</span>
+            <ChevronRight className="h-4 w-4 text-slate-400" />
+          </Link>
+          <Link to="/cashflow" className="rounded-card border border-line/60 p-3 bg-surface/30 hover:bg-white transition-colors flex items-center justify-between">
+            <span className="text-xs font-bold text-navy">Cashflow</span>
+            <ChevronRight className="h-4 w-4 text-slate-400" />
+          </Link>
+          <Link to="/pnl" className="rounded-card border border-line/60 p-3 bg-surface/30 hover:bg-white transition-colors flex items-center justify-between">
+            <span className="text-xs font-bold text-navy">PNL (Profit & Loss)</span>
+            <ChevronRight className="h-4 w-4 text-slate-400" />
+          </Link>
+        </div>
       </section>
     </div>
   );

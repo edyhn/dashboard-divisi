@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\OrgController;
 use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\RevenueController;
+use App\Http\Controllers\Api\V1\SobatHrController;
 use App\Http\Controllers\Api\V1\TargetController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +26,14 @@ Route::prefix('v1')->group(function () {
         Route::get('auth/me', [AuthController::class, 'me']);
         Route::post('auth/reset', [AuthController::class, 'reset'])->middleware('throttle:6,1');
 
+        // Sobat API Integration (protected by capability & scope)
+        Route::middleware(['capability:view:report'])->group(function () {
+            Route::get('sobathr/status', [SobatHrController::class, 'status']);
+        });
+        Route::middleware(['scope', 'capability:write:revenue'])->group(function () {
+            Route::post('sobathr/sync-tenants', [SobatHrController::class, 'syncTenants']);
+        });
+
         // Org read models
         Route::get('org/divisions', [OrgController::class, 'divisions']);
         Route::get('org/outlets', [OrgController::class, 'outlets']);
@@ -36,6 +45,7 @@ Route::prefix('v1')->group(function () {
             Route::get('bod/executive-read-model', [BodController::class, 'executiveReadModel']);
             Route::get('bod/kpi-compatibility', [BodController::class, 'checkCompatibility']);
             Route::get('bod/overview', [BodController::class, 'overview']);
+            Route::get('bod/pnl-comparison', [BodController::class, 'pnlComparison']);
             Route::get('division-configs', [DivisionConfigController::class, 'getAll']);
         });
 

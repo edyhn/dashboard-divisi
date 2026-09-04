@@ -53,6 +53,15 @@ class DatabaseSeeder extends Seeder
         ['email' => 'admin.fnb@dashboard.test', 'name' => 'Admin FnB', 'role' => 'ADMIN', 'division_code' => 'FNB'],
         ['email' => 'admin.fin@dashboard.test', 'name' => 'Admin Finance', 'role' => 'ADMIN', 'division_code' => 'FIN'],
         ['email' => 'admin.mc@dashboard.test', 'name' => 'Admin Money Changer', 'role' => 'ADMIN', 'division_code' => 'MC'],
+        // PIC (View Only)
+        ['email' => 'pic.wrap@dashboard.test', 'name' => 'PIC Wrapping (View Only)', 'role' => 'USER', 'division_code' => 'WRAP'],
+        ['email' => 'pic.cell@dashboard.test', 'name' => 'PIC Cellular (View Only)', 'role' => 'USER', 'division_code' => 'CELL'],
+        ['email' => 'pic.refl@dashboard.test', 'name' => 'PIC Refleksi (View Only)', 'role' => 'USER', 'division_code' => 'REFL'],
+        ['email' => 'pic.mini@dashboard.test', 'name' => 'PIC Minimarket (View Only)', 'role' => 'USER', 'division_code' => 'MINI'],
+        ['email' => 'pic.fnb@dashboard.test', 'name' => 'PIC FnB (View Only)', 'role' => 'USER', 'division_code' => 'FNB'],
+        ['email' => 'pic.fin@dashboard.test', 'name' => 'PIC Finance (View Only)', 'role' => 'USER', 'division_code' => 'FIN'],
+        ['email' => 'pic.mc@dashboard.test', 'name' => 'PIC Money Changer (View Only)', 'role' => 'USER', 'division_code' => 'MC'],
+        ['email' => 'pic@dashboard.test', 'name' => 'PIC View Only', 'role' => 'USER', 'division_code' => null],
     ];
 
     public function run(): void

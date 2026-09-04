@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { LayoutDashboard, TrendingUp, Target, Award, Users, ClipboardList, BarChart3, Settings, LogOut, Menu, X } from 'lucide-react';
+import { NavLink, Outlet, useLocation, Navigate } from 'react-router-dom';
+import { LayoutDashboard, TrendingUp, Target, Award, Users, ClipboardList, BarChart3, Settings, Menu, X, Calendar, Store, Calculator, DollarSign, PieChart } from 'lucide-react';
 import { MENU_ITEMS, roleDisplay } from '../mocks/session';
 import { useAuth } from '../session/AuthContext';
-import { useSession } from '../session/SessionContext';
+import LogoutButton from '../components/LogoutButton';
 import { hasCapability } from '../session/capability';
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -15,6 +15,11 @@ const ICON_MAP: Record<string, React.ElementType> = {
   '/workforce': ClipboardList,
   '/laporan': BarChart3,
   '/konfigurasi': Settings,
+  '/laporan-harian': Calendar,
+  '/rincian-tenant': Store,
+  '/budgeting': Calculator,
+  '/cashflow': DollarSign,
+  '/pnl': PieChart,
 };
 
 export function AppLayout() {
@@ -27,29 +32,27 @@ export function AppLayout() {
     document.body.style.overflow = 'hidden';
     return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
   }, [drawerOpen]);
-  let authUser: ReturnType<typeof useAuth>['user'] | null = null;
-  let authLogout: () => Promise<void> = async () => {};
-  try {
-    const a = useAuth();
-    authUser = a.user;
-    authLogout = a.logout;
-  } catch {}
-  let sessionUser: ReturnType<typeof useSession>['user'] | null = null;
-  try {
-    const s = useSession();
-    sessionUser = s.user;
-  } catch {}
-  const user = authUser ?? (sessionUser as unknown as typeof authUser) ?? null;
-  const logout = authLogout;
+  const { user, login: authLogin, logout: authLogout } = useAuth();
+  const logout = async () => {
+    await authLogout();
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('dashboard-divisi.role-demo');
+    localStorage.removeItem('dashboard-divisi.division-demo');
+    window.location.href = '/login';
+  };
+
+  const handleQuickSwitch = async (email: string) => {
+    try {
+      await authLogin(email, 'Password123!');
+    } catch {
+      alert('Gagal switch role instan. Pastikan backend berjalan.');
+    }
+  };
 
   const location = useLocation();
 
   if (!user) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-surface">
-        <p className="text-sm text-slate-500">Memuat sesi — silakan login</p>
-      </div>
-    );
+    return <Navigate to="/login" replace />;
   }
 
   const activeMenu = MENU_ITEMS.find((item) => item.path === location.pathname);
@@ -72,8 +75,8 @@ export function AppLayout() {
             to={item.path}
             className={({ isActive }) =>
               isActive
-                ? 'flex shrink-0 items-center gap-2.5 rounded-card bg-white/15 px-3 py-2.5 text-sm font-medium text-white shadow-glass backdrop-blur'
-                : 'flex shrink-0 items-center gap-2.5 rounded-card px-3 py-2.5 text-sm font-medium text-slate-300 hover:bg-white/10 hover:text-white transition-colors'
+                ? 'flex shrink-0 items-center gap-2.5 rounded-card bg-white/20 px-3 py-2.5 text-sm font-medium text-white shadow-glass backdrop-blur-md ring-1 ring-white/10'
+                : 'flex shrink-0 items-center gap-2.5 rounded-card px-3 py-2.5 text-sm font-medium text-slate-300 hover:bg-white/10 hover:text-white transition-all duration-200'
             }
           >
             <Icon className="h-4 w-4" />
@@ -85,12 +88,15 @@ export function AppLayout() {
   );
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen bg-mesh relative selection:bg-primary/20 selection:text-primary-dark">
+      {/* Decorative ambient background for layout */}
+      <div className="pointer-events-none absolute -top-40 right-0 h-96 w-96 rounded-full bg-primary/5 blur-[100px]" />
+      
       {/* Drawer mobile overlay */}
       {drawerOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-navy/40 backdrop-blur-sm" onClick={() => setDrawerOpen(false)} aria-hidden="true" />
-          <aside className="absolute left-0 top-0 h-full w-64 bg-gradient-to-b from-navy via-navy to-navy-light px-4 py-6 text-slate-200 shadow-glass">
+        <div className="fixed inset-0 z-50 lg:hidden animate-fade-in">
+          <div className="absolute inset-0 bg-navy/40 backdrop-blur-md" onClick={() => setDrawerOpen(false)} aria-hidden="true" />
+          <aside className="absolute left-0 top-0 h-full w-64 bg-gradient-to-b from-navy via-navy to-[#0b1221] px-4 py-6 text-slate-200 shadow-2xl ring-1 ring-white/10">
             <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center gap-3"><div className="flex h-9 w-9 items-center justify-center rounded-card-lg bg-white/15 text-white font-bold text-sm">DD</div><p className="text-sm font-semibold text-white">Dashboard Divisi</p></div>
               <button type="button" aria-label="Tutup menu" onClick={() => setDrawerOpen(false)} className="rounded-input p-1 text-slate-300 hover:bg-white/10 hover:text-white"><X className="h-5 w-5" /></button>
@@ -101,34 +107,30 @@ export function AppLayout() {
                 return <NavLink key={item.path} to={item.path} onClick={() => setDrawerOpen(false)} className={({ isActive }) => isActive ? 'flex items-center gap-2.5 rounded-card-lg bg-white/15 px-3 py-2.5 text-sm font-medium text-white shadow-glass' : 'flex items-center gap-2.5 rounded-card-lg px-3 py-2.5 text-sm font-medium text-slate-300 hover:bg-white/10'}><Icon className="h-4 w-4" />{item.label}</NavLink>;
               })}
             </nav>
-            <div className="absolute bottom-4 left-4 right-4 rounded-card-lg bg-white/10 p-3"><p className="text-xs font-medium text-white">{user.name}</p><p className="text-xs text-slate-300">{roleLabel} · {scopeLabel}</p><button onClick={() => void logout()} className="mt-2 flex w-full items-center gap-1.5 rounded-input bg-white/10 px-2 py-1.5 text-xs font-medium text-white hover:bg-white/15"><LogOut className="h-3.5 w-3.5" /> Keluar</button></div>
+            
           </aside>
         </div>
       )}
       {/* Modern sidebar with gradient */}
-      <aside className="fixed inset-y-0 left-0 hidden w-64 bg-gradient-to-b from-navy via-navy to-navy-light px-4 py-6 text-slate-200 lg:block shadow-glass">
+      <aside className="fixed inset-y-0 left-0 hidden w-64 bg-gradient-to-b from-navy via-navy to-[#0b1221] px-4 py-6 text-slate-200 lg:block border-r border-white/5 shadow-glass z-50 flex flex-col">
         <div className="mb-8 flex items-center gap-3 px-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-card bg-white/15 text-white font-bold text-sm">DD</div>
+          <div className="flex h-9 w-9 items-center justify-center rounded-card bg-gradient-to-br from-primary to-info text-white font-bold text-sm shadow-md ring-1 ring-white/20">DD</div>
           <div>
-            <p className="text-sm font-semibold text-white leading-none">Dashboard Divisi</p>
-            <p className="text-xs text-slate-400">7 divisi · Real BE</p>
+            <p className="text-sm font-bold text-white leading-none tracking-tight">Dashboard Divisi</p>
+            <p className="text-xs text-slate-400 mt-1">7 divisi · Real BE</p>
           </div>
         </div>
         {renderMenu('sidebar')}
-        <div className="absolute bottom-4 left-4 right-4">
-          <div className="rounded-card bg-white/10 p-3">
-            <p className="text-xs font-medium text-white">{user.name}</p>
-            <p className="text-xs text-slate-300">{roleLabel} · {scopeLabel}</p>
-            <button onClick={() => void logout()} className="mt-2 flex w-full items-center gap-1.5 rounded-input bg-white/10 px-2 py-1.5 text-xs font-medium text-white hover:bg-white/15 transition-colors">
-              <LogOut className="h-3.5 w-3.5" /> Keluar
-            </button>
-          </div>
+        <div className="absolute bottom-4 left-4 right-4 rounded-card-lg bg-white/10 p-3">
+          <p className="text-xs font-medium text-white">{user.name}</p>
+          <p className="text-xs text-slate-300">{roleLabel} · {scopeLabel}</p>
+          <LogoutButton onLogout={() => void logout()} className="mt-2 flex w-full items-center gap-1.5 rounded-input bg-white/10 px-2 py-1.5 text-xs font-medium text-white hover:bg-white/15 transition-colors" />
         </div>
       </aside>
 
-      <div className="flex min-h-screen flex-col lg:ml-64">
+      <div className="flex min-h-screen flex-col lg:ml-64 relative z-10">
         {/* Glass header */}
-        <header className="sticky top-0 z-40 border-b border-line/60 bg-white/80 glass supports-[backdrop-filter]:bg-white/60">
+        <header className="sticky top-0 z-40 border-b border-line/40 bg-white/60 glass backdrop-blur-xl">
           <div className="flex min-h-16 flex-col gap-3 px-4 py-3 lg:flex-row lg:items-center lg:justify-between lg:px-6">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
@@ -144,43 +146,30 @@ export function AppLayout() {
               <span className="text-sm font-medium lg:hidden">{user.name}</span>
             </div>
             <div className="flex items-center gap-3">
+              <div className="hidden lg:flex items-center gap-2 rounded-full border border-line bg-white/90 px-3 py-1.5 text-xs shadow-sm">
+                <span className="text-slate-500 font-semibold">⚡ Quick Role:</span>
+                <select
+                  value={user.email}
+                  onChange={(e) => { if (e.target.value && e.target.value !== user.email) void handleQuickSwitch(e.target.value); }}
+                  className="bg-transparent font-bold text-navy focus:outline-none cursor-pointer"
+                >
+                  <option value="bod1@dashboard.test">👔 Executive (BOD)</option>
+                  <option value="manager.wrap@dashboard.test">⚡ Superadmin (Manager)</option>
+                  <option value="admin.wrap@dashboard.test">📝 Admin Divisi</option>
+                  <option value="pic@dashboard.test">🔒 PIC (View Only)</option>
+                </select>
+              </div>
               <div className="hidden lg:flex items-center gap-2 rounded-full bg-surface px-3 py-1.5 text-xs">
                 <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
                 <span className="font-medium text-navy">{roleLabel}</span>
                 <span className="text-slate-400">·</span>
                 <span className="text-slate-600">{scopeLabel}</span>
               </div>
-              <button onClick={() => void logout()} className="hidden lg:flex items-center gap-1.5 rounded-input border border-line bg-white px-3 py-1.5 text-sm font-medium text-navy hover:bg-surface transition-colors">
-                <LogOut className="h-4 w-4" /> Keluar
-              </button>
             </div>
             <div className="lg:hidden">{renderMenu('mobile')}</div>
           </div>
         </header>
-        <main className="flex-1 p-4 lg:p-6 bg-surface">
-          {/* Modern context cards with glass */}
-          <section className="mb-6 grid gap-3 md:grid-cols-3" aria-label="Status konteks">
-            <div className="rounded-card-lg border border-line/60 bg-white p-4 shadow-card hover:shadow-card-hover transition-shadow">
-              <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Breadcrumb</p>
-              <p className="mt-1 text-sm font-semibold text-navy flex items-center gap-2">
-                {activeMenu?.label ?? 'Halaman'}
-                <span className="rounded-pill bg-primary-light px-2 py-0.5 text-xs font-medium text-primary">Real BE</span>
-              </p>
-            </div>
-            <div className="rounded-card-lg border border-line/60 bg-white p-4 shadow-card hover:shadow-card-hover transition-shadow">
-              <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Scope aktif</p>
-              <p className="mt-1 text-sm font-semibold text-navy">{roleLabel} · {scopeLabel}</p>
-              <p className="text-xs text-slate-500">Envelope trace_id aktif</p>
-            </div>
-            <div className="rounded-card-lg border border-line/60 bg-gradient-to-br from-success-light to-white p-4 shadow-card">
-              <p className="text-xs font-medium uppercase tracking-wider text-success">Freshness</p>
-              <p className="mt-1 text-sm font-semibold text-success flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
-                Sinkron real-time
-              </p>
-              <p className="text-xs text-slate-600">Via proxy /api · CORS OK</p>
-            </div>
-          </section>
+        <main className="flex-1 p-4 lg:p-6 lg:px-8">
           <Outlet />
         </main>
       </div>

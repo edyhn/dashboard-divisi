@@ -38,6 +38,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
+    // If we already have a logged-in user, skip refresh to avoid overwriting after login
+    if (user) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -72,23 +77,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (isTestEnv) return;
+    // Run once on mount to check existing session
     void refresh();
   }, [refresh, isTestEnv]);
 
   const login = useCallback(async (email: string, password: string) => {
+    setLoading(true);
     setError(null);
     try {
-      await authApi.login(email, password);
-      await refresh();
+      const resp = await authApi.login(email, password);
+      if (resp.data?.accessToken) {
+        localStorage.setItem('access_token', resp.data.accessToken);
+      }
+      setUser(resp.data.user);
+      setLoading(false);
+      setError(null);
     } catch (e) {
       const msg = e instanceof ApiException ? e.message : 'Login gagal';
       setError(msg);
+      setLoading(false);
       throw e;
     }
-  }, [refresh]);
+  }, []);
+
 
   const logout = useCallback(async () => {
     await authApi.logout().catch(() => {});
+    localStorage.removeItem('access_token');
     setUser(null);
   }, []);
 

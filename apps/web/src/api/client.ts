@@ -3,7 +3,7 @@
  * Envelope: { data, meta:{trace_id}, links:{self} } + Error { error:{code,message,trace_id} }
  * Auth: httpOnly cookie access_token (SOP: Zero Hardcoded Secrets, via .env)
  */
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '/api/v1';
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '/api';
 
 export interface ApiEnvelope<T> {
   data: T;
@@ -32,8 +32,10 @@ export class ApiException extends Error {
 async function request<T>(path: string, init: RequestInit = {}): Promise<ApiEnvelope<T>> {
   const url = path.startsWith('http') ? path : `${API_BASE}${path.startsWith('/') ? '' : '/'}${path}`;
   const isForm = init.body instanceof FormData;
+  const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
   const headers: Record<string, string> = {
     ...(isForm ? {} : { 'Content-Type': 'application/json' }),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...((init.headers as Record<string, string> | undefined) ?? {}),
   };
   const res = await fetch(url, {
@@ -49,6 +51,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<ApiEnve
     const err = body.error ?? { code: 'UNKNOWN', message: res.statusText, trace_id: traceId };
     // SOP: 401 → redirect ke login (kecuali di test)
     if (res.status === 401 && typeof window !== 'undefined' && !window.location.pathname.startsWith('/login') && (typeof import.meta === 'undefined' || (import.meta as unknown as { env?: { MODE?: string } }).env?.MODE !== 'test')) {
+      localStorage.removeItem('access_token');
       // simpan pesan untuk login page
       window.location.assign('/login?expired=1');
     }

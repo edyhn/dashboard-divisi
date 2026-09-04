@@ -9,7 +9,17 @@ export function useBodOverview() {
   const { user, loading } = useAuth();
   return useQuery({
     queryKey: ['bod', 'overview', periodFrom, periodTo, user?.id],
-    queryFn: () => bodApi.overview(periodFrom || undefined, periodTo || undefined).then((r) => r.data),
+    queryFn: () => bodApi.overview(periodFrom || undefined, periodTo || undefined),
+    enabled: !loading && !!user,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function usePnlComparison(year?: number, divisions?: string[], outlets?: string[], periodType?: 'monthly' | 'daily', month?: number) {
+  const { user, loading } = useAuth();
+  return useQuery({
+    queryKey: ['bod', 'pnl-comparison', year, divisions, outlets, periodType, month, user?.id],
+    queryFn: () => bodApi.pnlComparison(year, divisions, outlets, periodType, month).then(r => r.data),
     enabled: !loading && !!user,
     staleTime: 5 * 60 * 1000,
   });
